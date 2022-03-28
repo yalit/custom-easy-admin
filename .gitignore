@@ -24,6 +24,6 @@ yarn-error.log
 
 
 ###> Own ignores
-data
+data/*.sql*
 public/build
 ###< Own ignores

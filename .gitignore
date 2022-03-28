@@ -1,8 +1,6 @@
 /public/build/fonts/glyphicons-*
 /public/build/images/glyphicons-*
 
-data
-
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -23,3 +21,9 @@ data
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+
+###> Own ignores
+data
+public/build
+###< Own ignores

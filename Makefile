@@ -3,18 +3,18 @@ about:
 
 install:
 	composer install
-	pnpm install
+	npm install
 
 build:
-	pnpm encore prod
+	npm encore prod
 
 build-dev:
-	pnpm encore dev
+	npm encore dev
 
 build-dev-watch:
-	pnpm encore dev --watch
+	npm encore dev --watch
 
-db-init:
+db-init-dev:
 	bin/console d:s:d --force --env=dev
 	bin/console d:s:c --env=dev
 	bin/console d:s:u --force --env=dev

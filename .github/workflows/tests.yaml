@@ -60,11 +60,14 @@ jobs:
             - name: "Composer Install"
               run: composer install
 
+            - name: "Encore Install"
+              run: npm install -g encore
+
             - name: "Prepare tests"
               run: make tests-prepare
 
             - name: "Setup assets"
-              run: npm run build
+              run: make build
 
             - name: "Install PHPUnit"
               run: vendor/bin/simple-phpunit install

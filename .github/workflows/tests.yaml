@@ -54,6 +54,17 @@ jobs:
                   key: ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}
                   restore-keys: ${{ runner.os }}-${{ matrix.php-version }}-composer-
 
+            - name: "Set node-modules cache directory"
+              id: node-modules-cache
+              run: echo "::set-output name=dir::node-modules"
+
+            - name: "Cache node_modules"
+              uses: actions/cache@v2.1.2
+              with:
+                path: ${{ steps.node-modules-cache.outputs.dir }}
+                key: js-${{ hashFiles('package.json') }}
+                restore-keys: js-
+
             - name: "Require symfony/flex"
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
 
@@ -61,13 +72,13 @@ jobs:
               run: composer install
 
             - name: "Npm Install"
-              run: npm install
+              run: npm install -g pnpm && pnpm install
 
             - name: "Prepare tests"
               run: make tests-prepare
 
             - name: "Setup assets"
-              run: make build
+              run: pnpm run build
 
             - name: "Install PHPUnit"
               run: vendor/bin/simple-phpunit install

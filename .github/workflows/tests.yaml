@@ -60,8 +60,8 @@ jobs:
             - name: "Composer Install"
               run: composer install
 
-            - name: "Encore Install"
-              run: npm install -g encore
+            - name: "Npm Install"
+              run: npm install
 
             - name: "Prepare tests"
               run: make tests-prepare

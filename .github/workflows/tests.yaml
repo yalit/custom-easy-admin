@@ -64,7 +64,7 @@ jobs:
               run: make tests-prepare
 
             - name: "Setup assets"
-              run: make build
+              run: npm run build
 
             - name: "Install PHPUnit"
               run: vendor/bin/simple-phpunit install

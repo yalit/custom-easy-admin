@@ -81,7 +81,7 @@ jobs:
               run: npm install -g pnpm
 
             - name: "Pnpm Install"
-            - run: pnpm install
+              run: pnpm install
 
             - name: "Prepare tests"
               run: make tests-prepare

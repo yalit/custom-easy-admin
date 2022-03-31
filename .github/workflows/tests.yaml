@@ -88,12 +88,7 @@ jobs:
 
             - name: "Setup assets"
               run: pnpm run build
-
-            - name: "Install PHPUnit"
-              run: vendor/bin/simple-phpunit install
-
-            - name: "PHPUnit version"
-              run: vendor/bin/simple-phpunit --version
+              continue-on-error: true
 
             - name: "Run tests"
-              run: vendor/bin/simple-phpunit ${{ env.PHPUNIT_FLAGS }}
+              run: bin/phpunit

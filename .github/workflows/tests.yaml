@@ -19,7 +19,7 @@ env:
 
 jobs:
     test:
-        name: "${{ matrix.operating-system }} / PHP ${{ matrix.php-version }}"
+        name: "${{ matrix.operating-system }} / PHP ${{ matrix.php-version }} / Node ${{ matrix.node }}"
         runs-on: ${{ matrix.operating-system }}
         continue-on-error: false
 
@@ -27,6 +27,7 @@ jobs:
             matrix:
                 operating-system: ['ubuntu-latest']
                 php-version: ['8.0', '8.1']
+                node: [ '14']
 
         steps:
             - name: "Checkout code"
@@ -65,16 +66,22 @@ jobs:
                 key: js-${{ hashFiles('package.json') }}
                 restore-keys: js-
 
+            - uses: actions/checkout@v2
+            - name: Setup node
+              uses: actions/setup-node@v2
+              with:
+                node-version: ${{ matrix.node }}
+            - run: npm install
+            - run: npm install -g pnpm
+
             - name: "Require symfony/flex"
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
 
             - name: "Composer Install"
               run: composer install
 
-            - name: "Npm Install"
-              run: |
-                npm install -g pnpm
-                pnpm install
+            - name: "Pnpm Install"
+            - run: pnpm install
 
             - name: "Prepare tests"
               run: make tests-prepare

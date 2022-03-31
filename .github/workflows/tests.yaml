@@ -72,7 +72,9 @@ jobs:
               run: composer install
 
             - name: "Npm Install"
-              run: npm install -g pnpm && pnpm install
+              run: |
+                npm install -g pnpm
+                pnpm install
 
             - name: "Prepare tests"
               run: make tests-prepare

@@ -55,6 +55,12 @@ jobs:
                   key: ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}
                   restore-keys: ${{ runner.os }}-${{ matrix.php-version }}-composer-
 
+            - name: "Require symfony/flex"
+              run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
+
+            - name: "Composer Install"
+              run: composer install
+
             - name: "Set node-modules cache directory"
               id: node-modules-cache
               run: echo "::set-output name=dir::node-modules"
@@ -70,14 +76,9 @@ jobs:
               uses: actions/setup-node@v2
               with:
                 node-version: ${{ matrix.node }}
-            - run: npm install
-            - run: npm install -g pnpm
 
-            - name: "Require symfony/flex"
-              run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
-
-            - name: "Composer Install"
-              run: composer install
+            - name: "Install pnpm"
+              run: npm install -g pnpm
 
             - name: "Pnpm Install"
             - run: pnpm install

@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace App\Tests\EasyAdmin\Security;
 
-use App\DataFixtures\AppFixtures;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Entity\User;
+use App\Tests\EasyAdmin\BaseAdminDataTrait;
+use App\Tests\EasyAdmin\BaseEasyAdminWebTestCase;
 
-class AccessSecurityTest extends WebTestCase
+class AccessSecurityTest extends BaseEasyAdminWebTestCase
 {
+    use BaseAdminDataTrait;
+
     /**
      * @test
      */
     public function noAccessForAnonymousUser()
     {
-        $client = static::createClient();
-        $client->request('GET', '/en/easyadmin');
+        $this->client->request('GET', '/en/easyadmin');
 
         self::assertResponseRedirects();
-        $client->followRedirect();
+        $this->client->followRedirect();
 
         self::assertResponseIsSuccessful();
         self::assertRouteSame('security_login');
@@ -26,29 +28,19 @@ class AccessSecurityTest extends WebTestCase
 
     /**
      * @test
-     * @dataProvider getUserData
+     * @dataProvider getAllUserData
      */
-    public function accessGrantedForLoggedInUsers(string $username, string $password)
+    public function accessGrantedForLoggedInUsers(User $user)
     {
-        $client = static::createClient([], [
-            'PHP_AUTH_USER' => $username,
-            'PHP_AUTH_PW' => $password,
-        ]);
-        $this->assertEasyAdminIsAccessible($client);
+        $this->loginUser($user);
+        $this->assertEasyAdminIsAccessible();
     }
 
-    public function getUserData(): array
+    public function assertEasyAdminIsAccessible(): void
     {
-        return array_map(function($user){
-            return [$user[1], $user[2]];
-        }, AppFixtures::getUserData());
-    }
-
-    public function assertEasyAdminIsAccessible($client): void
-    {
-        $client->request('GET', '/en/easyadmin');
+        $this->client->request('GET', '/en/easyadmin');
         self::assertResponseRedirects();
-        $client->followRedirect();
+        $this->client->followRedirect();
         self::assertResponseIsSuccessful();
         self::assertRouteSame('easyadmin');
     }

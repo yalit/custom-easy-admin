@@ -59,8 +59,12 @@ jobs:
       - name: Install Composer dependencies
         run: make install
 
+      ## —— Firefox 🧙‍️ —————————————————————————————————————————————————————————
+      - name: Install Firefox
+        run: apt-get update; apt-get install -y firefox-esr
+
       ## —— Tests ✅ ———————————————————————————————————————————————————————————
-      - name: Prepare test database and load fixtures
+      - name: Prepare test environment
         run: |
           make tests-prepare
 

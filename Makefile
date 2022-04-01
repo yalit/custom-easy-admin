@@ -27,6 +27,7 @@ tests-prepare:
 	bin/console d:s:c --env=test
 	bin/console d:s:u --force --env=test
 	bin/console d:f:l -n --env=test
+	vendor/bin/bdi detect drivers
 
 tests:
 	bin/phpunit

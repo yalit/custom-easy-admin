@@ -9,7 +9,6 @@ specifiers:
   bootstrap-tagsinput: ^0.7.1
   bootswatch: ^3.4.1
   core-js: ^3.21.1
-  dart-sass: ^1.25.0
   eonasdan-bootstrap-datetimepicker: ^4.17.49
   highlight.js: ^10.7.3
   imports-loader: ^0.8.0
@@ -31,7 +30,6 @@ devDependencies:
   bootstrap-tagsinput: 0.7.1
   bootswatch: 3.4.1
   core-js: 3.21.1
-  dart-sass: 1.25.0
   eonasdan-bootstrap-datetimepicker: 4.17.49
   highlight.js: 10.7.3
   imports-loader: 0.8.0
@@ -2395,15 +2393,6 @@ packages:
     dependencies:
       es5-ext: 0.10.59
       type: 1.2.0
-    dev: true
-
-  /dart-sass/1.25.0:
-    resolution: {integrity: sha512-syNOAstJXAmvD3RifcDk3fiPMyYE2fY8so6w9gf2/wNlKpG0zyH+oiXubEYVOy1WAWkzOc72pbAxwx+3OU4JJA==}
-    engines: {node: '>=8.9.0'}
-    deprecated: This package has been renamed to 'sass'.
-    hasBin: true
-    dependencies:
-      chokidar: 3.5.3
     dev: true
 
   /debug/2.6.9:

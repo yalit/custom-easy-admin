@@ -53,8 +53,6 @@ abstract class BaseEasyAdminWebTestCase extends WebTestCase implements BaseAdmin
             $this->adminUrlGenerator->setEntityId($entityId);
         }
 
-        $this->client->request('GET',
-            $this->adminUrlGenerator->generateUrl()
-        );
+        $this->client->request('GET', $this->adminUrlGenerator->generateUrl());
     }
 }

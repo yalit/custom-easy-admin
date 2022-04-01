@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\EasyAdmin\Security;
 
 use App\Entity\User;
-use App\Tests\EasyAdmin\BaseAdminDataTrait;
+use App\Tests\EasyAdmin\BaseAdminUserDataTrait;
 use App\Tests\EasyAdmin\BaseEasyAdminWebTestCase;
 
 class AccessSecurityTest extends BaseEasyAdminWebTestCase
 {
-    use BaseAdminDataTrait;
+    use BaseAdminUserDataTrait;
 
     /**
      * @test

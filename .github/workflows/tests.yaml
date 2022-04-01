@@ -1,100 +1,69 @@
-name: "Tests"
-
+# https://help.github.com/en/actions
+name: Full CI process for Symfony
 on:
-    pull_request:
-    push:
-        branches:
-            - main
-
-env:
-    fail-fast: true
-    PHPUNIT_FLAGS: "-v"
-    SYMFONY_PHPUNIT_DIR: "$HOME/symfony-bridge/.phpunit"
-    SYMFONY_REQUIRE: ">=4.4"
-    # 40x: Since symfony/monolog-bridge 5.2:
-    # Passing an actionLevel (int|string) as constructor's 3rd argument of
-    # "Symfony\Bridge\Monolog\Handler\FingersCrossed\HttpCodeActivationStrategy"
-    # is deprecated, "Monolog\Handler\FingersCrossed\ActivationStrategyInterface" expected.
-    SYMFONY_DEPRECATIONS_HELPER: 40
-
+  push:
+    branches:
+      - master
 jobs:
-    test:
-        name: "${{ matrix.operating-system }} / PHP ${{ matrix.php-version }} / Node ${{ matrix.node }}"
-        runs-on: ${{ matrix.operating-system }}
-        continue-on-error: false
+  symfony:
+    name: Symfony (PHP ${{ matrix.php-versions }})
+    # https://hub.docker.com/_/ubuntu/
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      matrix:
+        php-versions: ['8.0', '8.1']
+    steps:
+      # —— Setup Github actions 🐙 —————————————————————————————————————————————
+      # https://github.com/actions/checkout (official)
+      - name: Checkout
+        uses: actions/checkout@v2
 
-        strategy:
-            matrix:
-                operating-system: ['ubuntu-latest']
-                php-version: ['8.0', '8.1']
-                node: [ '14']
+      # https://github.com/shivammathur/setup-php (community)
+      - name: Setup PHP, extensions and composer with shivammathur/setup-php
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, iconv, json, mbstring
+        env:
+          update: true
 
-        steps:
-            - name: "Checkout code"
-              uses: actions/checkout@v2.3.3
+      - name: Check PHP Version
+        run: php -v
 
-            - name: "Install PHP with extensions"
-              uses: shivammathur/setup-php@2.7.0
-              with:
-                  coverage: "none"
-                  extensions: "intl, mbstring, pdo_sqlite"
-                  php-version: ${{ matrix.php-version }}
-                  tools: composer:v2
+      ## —— Yarn 🐱 ————————————————————————————————————————————————————————————
+      - name: Yarn install
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: yarn install
 
-            - name: "Add PHPUnit matcher"
-              run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+      - name: Yarn build
+        run: yarn run encore production
 
-            - name: "Set composer cache directory"
-              id: composer-cache
-              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+      # —— Composer 🧙‍️ —————————————————————————————————————————————————————————
+      - name: Validate composer.json and composer.lock
+        run: composer validate
 
-            - name: "Cache composer"
-              uses: actions/cache@v2.1.2
-              with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}
-                  restore-keys: ${{ runner.os }}-${{ matrix.php-version }}-composer-
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-            - name: "Require symfony/flex"
-              run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
+      - name: Cache composer dependencies
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
-            - name: "Composer Install"
-              run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+      - name: Install Composer dependencies
+        run: make install
 
-            - name: "Set node-modules cache directory"
-              id: node-modules-cache
-              run: echo "::set-output name=dir::node-modules"
+      ## —— Tests ✅ ———————————————————————————————————————————————————————————
+      - name: Prepare test database and load fixtures
+        run: |
+          make tests-prepare
 
-            - name: "Cache node_modules"
-              uses: actions/cache@v2.1.2
-              with:
-                path: ${{ steps.node-modules-cache.outputs.dir }}
-                key: js-${{ hashFiles('package.json') }}
-                restore-keys: js-
-
-            - name: Setup node
-              uses: actions/setup-node@v2
-              with:
-                node-version: ${{ matrix.node }}
-
-            - name: "Install pnpm"
-              run: npm install -g pnpm
-
-            - name: "Pnpm Install"
-              run: pnpm install
-
-            - name: "Prepare tests"
-              run: make tests-prepare
-
-            - name: "Setup assets"
-              run: pnpm run build
-              continue-on-error: true
-
-            - name: Archive production artifacts
-              uses: actions/upload-artifact@v1
-              with:
-                name: build
-                path: public/build
-
-            - name: "Run tests"
-              run: bin/phpunit
+      - name: Run functionnal and unit tests
+        run: |
+          ./bin/phpunit

@@ -28,3 +28,7 @@ data/*.sql*
 public/build/*
 drivers
 ###< Own ignores
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###

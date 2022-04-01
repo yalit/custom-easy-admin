@@ -15,6 +15,7 @@ use App\Entity\Comment;
 use App\Entity\Post;
 use App\Entity\Tag;
 use App\Entity\User;
+use App\Entity\UserRoles;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -97,8 +98,12 @@ class AppFixtures extends Fixture
     {
         return [
             // $userData = [$fullname, $username, $password, $email, $roles];
-            ['Jane Doe', 'jane_admin', 'kitten', 'jane_admin@symfony.com', ['ROLE_ADMIN']],
-            ['Tom Doe', 'tom_admin', 'kitten', 'tom_admin@symfony.com', ['ROLE_ADMIN']],
+            ['Jane Doe', 'jane_admin', 'kitten', 'jane_admin@symfony.com', [UserRoles::ROLE_ADMIN]],
+            ['Tom Doe', 'tom_admin', 'kitten', 'tom_admin@symfony.com', [UserRoles::ROLE_ADMIN]],
+            ['Nick Pub', 'nick_pub', 'kitten', 'nick_pub@symfony.com', [UserRoles::ROLE_PUBLISHER]],
+            ['Lola Author', 'lola_author', 'kitten', 'lola_author@symfony.com', [UserRoles::ROLE_AUTHOR]],
+            ['Youssef Author', 'youssef_author', 'kitten', 'youssef_author@symfony.com', [UserRoles::ROLE_AUTHOR, UserRoles::ROLE_REVIEWER]],
+            ['Yan Review', 'yan_review', 'kitten', 'yan_review@symfony.com', [UserRoles::ROLE_REVIEWER]],
             ['John Doe', 'john_user', 'kitten', 'john_user@symfony.com', ['ROLE_USER']],
         ];
     }

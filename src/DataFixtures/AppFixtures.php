@@ -39,7 +39,7 @@ class AppFixtures extends Fixture
 
     private function loadUsers(ObjectManager $manager): void
     {
-        foreach ($this->getUserData() as [$fullname, $username, $password, $email, $roles]) {
+        foreach (self::getUserData() as [$fullname, $username, $password, $email, $roles]) {
             $user = new User();
             $user->setFullName($fullname);
             $user->setUsername($username);
@@ -94,7 +94,7 @@ class AppFixtures extends Fixture
         $manager->flush();
     }
 
-    private function getUserData(): array
+    public static function getUserData(): array
     {
         return [
             // $userData = [$fullname, $username, $password, $email, $roles];

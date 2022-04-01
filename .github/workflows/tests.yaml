@@ -59,7 +59,7 @@ jobs:
               run: composer global require --no-progress --no-scripts --no-plugins symfony/flex
 
             - name: "Composer Install"
-              run: composer install
+              run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
 
             - name: "Set node-modules cache directory"
               id: node-modules-cache
@@ -89,6 +89,12 @@ jobs:
             - name: "Setup assets"
               run: pnpm run build
               continue-on-error: true
+
+            - name: Archive production artifacts
+              uses: actions/upload-artifact@v1
+              with:
+                name: build
+                path: public/build
 
             - name: "Run tests"
               run: bin/phpunit

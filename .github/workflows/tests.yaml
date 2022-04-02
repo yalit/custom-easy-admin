@@ -1,6 +1,7 @@
 # https://help.github.com/en/actions
 name: Full CI process for Symfony
 on:
+  pull_request:
   push:
     branches:
       - main
@@ -61,7 +62,8 @@ jobs:
 
       ## —— Firefox 🧙‍️ —————————————————————————————————————————————————————————
       - name: Install Firefox
-        run: apt-get update; apt-get install -y firefox-esr
+        uses: browser-actions/setup-firefox@latest
+        run: firefox --version
 
       ## —— Tests ✅ ———————————————————————————————————————————————————————————
       - name: Prepare test environment

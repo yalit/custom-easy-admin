@@ -7,6 +7,7 @@ namespace App\Tests\EasyAdmin\Security;
 use App\Entity\User;
 use App\Tests\EasyAdmin\BaseAdminUserDataTrait;
 use App\Tests\EasyAdmin\BaseEasyAdminWebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 class AccessSecurityTest extends BaseEasyAdminWebTestCase
 {
@@ -28,7 +29,25 @@ class AccessSecurityTest extends BaseEasyAdminWebTestCase
 
     /**
      * @test
-     * @dataProvider getAllUserData
+     * @dataProvider getAllUserUsers
+     */
+    public function noAccessForUserWithOnlyROLE_USER(User $user)
+    {
+        $this->client->request('GET', '/en/login');
+
+        $this->client->submitForm('Sign in', [
+            '_username' => $user->getUsername(),
+            '_password' => $user->getPassword()
+        ]);
+
+        $this->client->request('GET', '/en/easyadmin');
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     * @dataProvider getAllAdminUsers
      */
     public function accessGrantedForLoggedInUsers(User $user)
     {

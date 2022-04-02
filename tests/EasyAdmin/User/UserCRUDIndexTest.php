@@ -16,7 +16,7 @@ class UserCRUDIndexTest extends BaseEasyAdminWebTestCase
 
     /**
      * @test
-     * @dataProvider getAllUserData
+     * @dataProvider getAllAdminUsers
      */
     public function indexIsDisplayedForAllUsers(User $user): void
     {
@@ -28,7 +28,7 @@ class UserCRUDIndexTest extends BaseEasyAdminWebTestCase
 
     /**
      * @test
-     * @dataProvider getAllUserData
+     * @dataProvider getAllAdminUsers
      */
     public function allUserInDBAreListedInUserIndex(User $user): void
     {

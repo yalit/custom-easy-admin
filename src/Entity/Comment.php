@@ -11,6 +11,7 @@
 
 namespace App\Entity;
 
+use App\Workflow\CommentWorkflow;
 use Doctrine\ORM\Mapping as ORM;
 use function Symfony\Component\String\u;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -60,7 +61,17 @@ class Comment
     /**
      * @ORM\Column(type="datetime")
      */
-    private \DateTime $publishedAt;
+    private \DateTime $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private ?\DateTime $publishedAt;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private ?\DateTime $cancelledAt;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User")
@@ -68,9 +79,14 @@ class Comment
      */
     private ?User $author = null;
 
+    /**
+     * @ORM\Column(type="string")
+     */
+    private string $status = CommentWorkflow::STATUS_CREATED;
+
     public function __construct()
     {
-        $this->publishedAt = new \DateTime();
+        $this->createdAt = new \DateTime();
     }
 
     #[Assert\IsTrue(message: 'comment.is_spam')]
@@ -96,12 +112,12 @@ class Comment
         $this->content = $content;
     }
 
-    public function getPublishedAt(): \DateTime
+    public function getPublishedAt(): ?\DateTime
     {
         return $this->publishedAt;
     }
 
-    public function setPublishedAt(\DateTime $publishedAt): void
+    public function setPublishedAt(?\DateTime $publishedAt): void
     {
         $this->publishedAt = $publishedAt;
     }
@@ -124,5 +140,35 @@ class Comment
     public function setPost(Post $post): void
     {
         $this->post = $post;
+    }
+
+    public function getCreatedAt(): \DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    public function getCancelledAt(): ?\DateTime
+    {
+        return $this->cancelledAt;
+    }
+
+    public function setCancelledAt(?\DateTime $cancelledAt): void
+    {
+        $this->cancelledAt = $cancelledAt;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
     }
 }

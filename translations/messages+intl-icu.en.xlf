@@ -442,6 +442,38 @@
                 <source>paginator.current</source>
                 <target>(current)</target>
             </trans-unit>
+
+
+            <trans-unit id="post.status.draft">
+                <source>post.status.draft</source>
+                <target>Draft</target>
+            </trans-unit>
+            <trans-unit id="post.status.in_review">
+                <source>post.status.in_review</source>
+                <target>In Review</target>
+            </trans-unit>
+            <trans-unit id="post.status.published">
+                <source>post.status.published</source>
+                <target>Published</target>
+            </trans-unit>
+            <trans-unit id="post.status.cancelled">
+                <source>post.status.cancelled</source>
+                <target>Cancelled</target>
+            </trans-unit>
+
+            <trans-unit id="post.action.to_review">
+                <source>post.action.to_review</source>
+                <target>To Review</target>
+            </trans-unit>
+            <trans-unit id="post.action.publish">
+                <source>post.action.publish</source>
+                <target>Publish</target>
+            </trans-unit>
+            <trans-unit id="post.action.cancel">
+                <source>post.action.cancel</source>
+                <target>Cancelled</target>
+            </trans-unit>
+
         </body>
     </file>
 </xliff>

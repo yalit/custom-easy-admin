@@ -1,2 +1,27 @@
 framework:
-    workflows: null
+    workflows:
+        post:
+            type: 'state_machine'
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: 'method'
+                property: 'status'
+            supports:
+                - App\Entity\Post
+            initial_marking: post.status.draft
+            places:
+                - post.status.draft
+                - post.status.in_review
+                - post.status.published
+                - post.status.cancelled
+            transitions:
+                post.action.to_review:
+                    from: post.status.draft
+                    to: post.status.in_review
+                post.action.publish:
+                    from: post.status.in_review
+                    to: post.status.published
+                post.action.cancel:
+                    from: post.status.in_review
+                    to: post.status.cancelled

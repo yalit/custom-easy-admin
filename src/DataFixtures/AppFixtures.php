@@ -82,6 +82,7 @@ class AppFixtures extends Fixture
             $post->addTag(...$tags);
 
             $post->setStatus($status);
+
             $post->setCreatedAt(new DateTime('now - '.$p.'hours'));
             if ($status !== PostWorkflow::STATUS_DRAFT) {
                 $post->setInReviewAt(new DateTime('now - '.$p.'minutes'));

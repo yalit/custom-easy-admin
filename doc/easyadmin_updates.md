@@ -9,7 +9,7 @@ I'll try to define specific branches with each time the updates made for a speci
 ## CRUD level
 ### 1. Security
 - restrict access at entity level
-- restrict access at Action level 
+- restrict access at Action level ==> done in branch : 01.only_admin_can_update_users 
 
 ### 2. Fields
 - custom Field within listing/index

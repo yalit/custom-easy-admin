@@ -47,7 +47,7 @@ class AccessSecurityTest extends BaseEasyAdminWebTestCase
 
     /**
      * @test
-     * @dataProvider getAllAdminUsers
+     * @dataProvider getAllEasyAdminUsers
      */
     public function accessGrantedForLoggedInUsers(User $user)
     {

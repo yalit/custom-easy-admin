@@ -15,6 +15,7 @@ build-dev-watch:
 	npm encore dev --watch
 
 db-init-dev:
+	bin/console d:s:d --env=dev --force
 	bin/console d:d:c --env=dev
 	bin/console d:s:c --env=dev
 	bin/console d:s:u --force --env=dev
@@ -23,6 +24,7 @@ db-fixtures:
 	bin/console d:f:l -n --env=dev
 
 tests-prepare:
+	bin/console d:s:d --env=test --force
 	bin/console d:d:c --env=test
 	bin/console d:s:c --env=test
 	bin/console d:s:u --force --env=test

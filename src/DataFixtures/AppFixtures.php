@@ -16,6 +16,7 @@ use App\Entity\Post;
 use App\Entity\Tag;
 use App\Entity\User;
 use App\Entity\UserRoles;
+use App\Workflow\PostWorkflow;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -69,15 +70,23 @@ class AppFixtures extends Fixture
 
     private function loadPosts(ObjectManager $manager): void
     {
-        foreach ($this->getPostData() as [$title, $slug, $summary, $content, $publishedAt, $author, $tags]) {
+        foreach ($this->getPostData() as $p => [$title, $slug, $summary, $content, $author, $tags, $status]) {
             $post = new Post();
             $post->setTitle($title);
             $post->setSlug($slug);
             $post->setSummary($summary);
             $post->setContent($content);
-            $post->setPublishedAt($publishedAt);
             $post->setAuthor($author);
             $post->addTag(...$tags);
+
+            $post->setStatus($status);
+            $post->setCreatedAt(new \DateTime('now - '.$p.'hours'));
+            if ($status !== PostWorkflow::STATUS_DRAFT) {
+                $post->setInReviewAt(new \DateTime('now - '.$p.'minutes'));
+            }
+            if (in_array($status, [PostWorkflow::STATUS_PUBLISHED, PostWorkflow::STATUS_CANCELLED])) {
+                $post->setPublishedAt(new \DateTime('now - '.$p.'seconds'));
+            }
 
             foreach (range(1, 5) as $i) {
                 $comment = new Comment();
@@ -125,18 +134,25 @@ class AppFixtures extends Fixture
 
     private function getPostData(): array
     {
+        $statuses = [
+            PostWorkflow::STATUS_DRAFT,
+            PostWorkflow::STATUS_IN_REVIEW,
+            PostWorkflow::STATUS_PUBLISHED,
+            PostWorkflow::STATUS_CANCELLED
+        ];
+
         $posts = [];
         foreach ($this->getPhrases() as $i => $title) {
-            // $postData = [$title, $slug, $summary, $content, $publishedAt, $author, $tags, $comments];
+            // $postData = [$title, $slug, $summary, $content, $author, $tags, $status];
             $posts[] = [
                 $title,
                 $this->slugger->slug($title)->lower(),
                 $this->getRandomText(),
                 $this->getPostContent(),
-                new \DateTime('now - '.$i.'days'),
                 // Ensure that the first post is written by Jane Doe to simplify tests
                 $this->getReference(['jane_admin', 'tom_admin'][0 === $i ? 0 : random_int(0, 1)]),
                 $this->getRandomTags(),
+                $statuses[$i % count($statuses)]
             ];
         }
 

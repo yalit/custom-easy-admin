@@ -13,19 +13,42 @@ trait BaseAdminUserDataTrait
     /**
      * @return Array<string, Array<array-key, User>>
      */
-    public function getAllAdminUsers(): array
+    public function getAllEasyAdminUsers(): array
     {
-        $adminRoles = [
+        $roles = [
             UserRoles::ROLE_ADMIN,
             UserRoles::ROLE_PUBLISHER,
             UserRoles::ROLE_REVIEWER,
             UserRoles::ROLE_AUTHOR,
         ];
 
-        return array_map(fn($user) => [$user], array_filter(
-            $this->getUsersFromUserData(),
-            fn(User $user) => count(array_intersect($adminRoles,$user->getRoles())) > 0
-        ));
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getAllAdminUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_ADMIN,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getAllNonAdminUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_PUBLISHER,
+            UserRoles::ROLE_REVIEWER,
+            UserRoles::ROLE_AUTHOR,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
     }
 
     /**
@@ -36,6 +59,18 @@ trait BaseAdminUserDataTrait
         return array_map(fn($user) => [$user], array_filter(
             $this->getUsersFromUserData(),
             fn(User $user) => count($user->getRoles()) === 1 && in_array(UserRoles::ROLE_USER, $user->getRoles())
+        ));
+    }
+
+    /**
+     * @param Array<array-key, string> $roles
+     * @return Array<string, Array<array-key, User>>
+     */
+    private function getFilteredUsersForTests(array $roles): array
+    {
+        return array_map(fn($user) => [$user], array_filter(
+            $this->getUsersFromUserData(),
+            fn(User $user) => count(array_intersect($roles,$user->getRoles())) > 0
         ));
     }
 

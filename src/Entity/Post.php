@@ -11,6 +11,7 @@
 
 namespace App\Entity;
 
+use App\Workflow\PostWorkflow;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -76,7 +77,22 @@ class Post
     /**
      * @ORM\Column(type="datetime")
      */
-    private \DateTime $publishedAt;
+    private \DateTime $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private ?\DateTime $inReviewAt = null;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private ?\DateTime $publishedAt = null;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private ?\DateTime $cancelledAt = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User")
@@ -107,9 +123,14 @@ class Post
     #[Assert\Count(max: 4, maxMessage: 'post.too_many_tags')]
     private Collection $tags;
 
+    /**
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private string $status = PostWorkflow::STATUS_DRAFT;
+
     public function __construct()
     {
-        $this->publishedAt = new \DateTime();
+        $this->createdAt = new \DateTime();
         $this->comments = new ArrayCollection();
         $this->tags = new ArrayCollection();
     }
@@ -149,12 +170,12 @@ class Post
         $this->content = $content;
     }
 
-    public function getPublishedAt(): \DateTime
+    public function getPublishedAt(): ?\DateTime
     {
         return $this->publishedAt;
     }
 
-    public function setPublishedAt(\DateTime $publishedAt): void
+    public function setPublishedAt(?\DateTime $publishedAt): void
     {
         $this->publishedAt = $publishedAt;
     }
@@ -214,5 +235,45 @@ class Post
     public function getTags(): Collection
     {
         return $this->tags;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
+    }
+
+    public function getCreatedAt(): \DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    public function getInReviewAt(): ?\DateTime
+    {
+        return $this->inReviewAt;
+    }
+
+    public function setInReviewAt(?\DateTime $inReviewAt): void
+    {
+        $this->inReviewAt = $inReviewAt;
+    }
+
+    public function getCancelledAt(): ?\DateTime
+    {
+        return $this->cancelledAt;
+    }
+
+    public function setCancelledAt(?\DateTime $cancelledAt): void
+    {
+        $this->cancelledAt = $cancelledAt;
     }
 }

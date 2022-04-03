@@ -39,6 +39,7 @@
         "symfony/twig-bundle": "^6.0",
         "symfony/validator": "^6.0",
         "symfony/webpack-encore-bundle": "^1.4",
+        "symfony/workflow": "^6.0",
         "symfony/yaml": "^6.0",
         "tgalopin/html-sanitizer-bundle": "^1.2",
         "twig/extra-bundle": "^3.0",

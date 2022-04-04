@@ -14,7 +14,7 @@ abstract class BaseEasyAdminWebTestCase extends WebTestCase implements BaseAdmin
 {
     protected KernelBrowser $client;
     protected AdminUrlGenerator $adminUrlGenerator;
-    private EntityManagerInterface $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     protected function setUp(): void
     {

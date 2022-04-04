@@ -2,6 +2,7 @@
 
 namespace App\Controller\EasyAdmin;
 
+use App\Controller\EasyAdmin\Fields\TranslatedTextField;
 use App\Entity\Post;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -45,6 +46,7 @@ class PostCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        yield TranslatedTextField::new('status')->hideOnForm();
         yield TextField::new('title');
         yield TextareaField::new('summary')->hideOnIndex()
             ->setNumOfRows(3)

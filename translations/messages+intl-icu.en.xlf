@@ -473,6 +473,28 @@
                 <source>post.action.cancel</source>
                 <target>Cancelled</target>
             </trans-unit>
+          
+            <trans-unit id="comment.status.created">
+                <source>comment.status.created</source>
+                <target>Created</target>
+            </trans-unit>
+            <trans-unit id="comment.status.published">
+                <source>comment.status.published</source>
+                <target>Published</target>
+            </trans-unit>
+            <trans-unit id="comment.status.cancelled">
+                <source>comment.status.cancelled</source>
+                <target>Cancelled</target>
+            </trans-unit>
+
+            <trans-unit id="comment.action.publish">
+                <source>comment.action.publish</source>
+                <target>Publish</target>
+            </trans-unit>
+            <trans-unit id="comment.action.cancel">
+                <source>comment.action.cancel</source>
+                <target>Cancelled</target>
+            </trans-unit>
 
         </body>
     </file>

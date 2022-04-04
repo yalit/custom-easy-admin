@@ -25,3 +25,24 @@ framework:
                 post.action.cancel:
                     from: post.status.in_review
                     to: post.status.cancelled
+        comment:
+            type: 'state_machine'
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: 'method'
+                property: 'status'
+            supports:
+                - App\Entity\Comment
+            initial_marking: comment.status.created
+            places:
+                - comment.status.created
+                - comment.status.published
+                - comment.status.cancelled
+            transitions:
+                comment.action.publish:
+                    from: comment.status.created
+                    to: comment.status.published
+                comment.action.cancel:
+                    from: comment.status.created
+                    to: comment.status.cancelled

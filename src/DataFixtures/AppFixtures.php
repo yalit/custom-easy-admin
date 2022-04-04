@@ -16,7 +16,9 @@ use App\Entity\Post;
 use App\Entity\Tag;
 use App\Entity\User;
 use App\Entity\UserRoles;
+use App\Workflow\CommentWorkflow;
 use App\Workflow\PostWorkflow;
+use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -80,19 +82,32 @@ class AppFixtures extends Fixture
             $post->addTag(...$tags);
 
             $post->setStatus($status);
-            $post->setCreatedAt(new \DateTime('now - '.$p.'hours'));
+
+            $post->setCreatedAt(new DateTime('now - '.$p.'hours'));
             if ($status !== PostWorkflow::STATUS_DRAFT) {
-                $post->setInReviewAt(new \DateTime('now - '.$p.'minutes'));
+                $post->setInReviewAt(new DateTime('now - '.$p.'minutes'));
             }
             if (in_array($status, [PostWorkflow::STATUS_PUBLISHED, PostWorkflow::STATUS_CANCELLED])) {
-                $post->setPublishedAt(new \DateTime('now - '.$p.'seconds'));
+                $post->setPublishedAt(new DateTime('now - '.$p.'seconds'));
             }
 
             foreach (range(1, 5) as $i) {
                 $comment = new Comment();
-                $comment->setAuthor($this->getReference('john_user'));
+                /** @var User $user */
+                $user = $this->getReference('john_user');
+                $comment->setAuthor($user);
                 $comment->setContent($this->getRandomText(random_int(255, 512)));
-                $comment->setPublishedAt(new \DateTime('now + '.$i.'seconds'));
+                $comment->setCreatedAt(new DateTime('now - '.$p*$i.'minutes'));
+
+                if (($p+$i) % 3 === 0) {
+                    $comment->setStatus(CommentWorkflow::STATUS_PUBLISHED);
+                    $comment->setPublishedAt(new DateTime('now - '.$p*$i.'seconds'));
+                }
+
+                if (($p+$i) % 4 === 0) {
+                    $comment->setStatus(CommentWorkflow::STATUS_CANCELLED);
+                    $comment->setCancelledAt(new DateTime('now - '.$p*$i.'seconds'));
+                }
 
                 $post->addComment($comment);
             }

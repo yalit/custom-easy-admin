@@ -34,6 +34,12 @@ services:
     App\EventSubscriber\CommentNotificationSubscriber:
         $sender: '%app.notifications.email_sender%'
 
+    App\Workflow\WorkflowActioner: ~
+
+    _instanceof:
+        App\Workflow\ActionInterface:
+            tags: [ 'app.workflow.action' ]
+
 when@test:
     services:
         test.user_password_hasher:

@@ -14,6 +14,7 @@ namespace App\Entity;
 use App\Workflow\PostWorkflow;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -75,24 +76,24 @@ class Post
     private ?string $content = null;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      */
-    private \DateTime $createdAt;
+    private \DateTimeImmutable $createdAt;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="datetime_immutable", nullable=true)
      */
-    private ?\DateTime $inReviewAt = null;
+    private ?\DateTimeImmutable $inReviewAt = null;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="datetime_immutable", nullable=true)
      */
-    private ?\DateTime $publishedAt = null;
+    private ?\DateTimeImmutable $publishedAt = null;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="datetime_immutable", nullable=true)
      */
-    private ?\DateTime $cancelledAt = null;
+    private ?\DateTimeImmutable $cancelledAt = null;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User")
@@ -130,9 +131,24 @@ class Post
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
         $this->comments = new ArrayCollection();
         $this->tags = new ArrayCollection();
+    }
+
+    public function getStatusDate(): \DateTimeImmutable
+    {
+        // not very sexy but app not foreseen to grow ;-) let's refactor if we need it afterwards
+        switch ($this->status){
+            case PostWorkflow::STATUS_DRAFT:
+                return $this->createdAt;
+            case PostWorkflow::STATUS_IN_REVIEW:
+                return $this->inReviewAt;
+            case PostWorkflow::STATUS_PUBLISHED:
+                return $this->publishedAt;
+            case PostWorkflow::STATUS_CANCELLED:
+                return $this->cancelledAt;
+        }
     }
 
     public function getId(): ?int
@@ -168,16 +184,6 @@ class Post
     public function setContent(?string $content): void
     {
         $this->content = $content;
-    }
-
-    public function getPublishedAt(): ?\DateTime
-    {
-        return $this->publishedAt;
-    }
-
-    public function setPublishedAt(?\DateTime $publishedAt): void
-    {
-        $this->publishedAt = $publishedAt;
     }
 
     public function getAuthor(): ?User
@@ -247,32 +253,42 @@ class Post
         $this->status = $status;
     }
 
-    public function getCreatedAt(): \DateTime
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTime $createdAt): void
+    public function setCreatedAt(\DateTimeImmutable $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
 
-    public function getInReviewAt(): ?\DateTime
+    public function getInReviewAt(): ?\DateTimeImmutable
     {
         return $this->inReviewAt;
     }
 
-    public function setInReviewAt(?\DateTime $inReviewAt): void
+    public function setInReviewAt(?\DateTimeImmutable $inReviewAt): void
     {
         $this->inReviewAt = $inReviewAt;
     }
 
-    public function getCancelledAt(): ?\DateTime
+    public function getPublishedAt(): ?\DateTimeImmutable
+    {
+        return $this->publishedAt;
+    }
+
+    public function setPublishedAt(?\DateTimeImmutable $publishedAt): void
+    {
+        $this->publishedAt = $publishedAt;
+    }
+
+    public function getCancelledAt(): ?\DateTimeImmutable
     {
         return $this->cancelledAt;
     }
 
-    public function setCancelledAt(?\DateTime $cancelledAt): void
+    public function setCancelledAt(?\DateTimeImmutable $cancelledAt): void
     {
         $this->cancelledAt = $cancelledAt;
     }

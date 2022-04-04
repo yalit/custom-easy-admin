@@ -7,13 +7,13 @@ namespace App\Tests\EasyAdmin\User;
 use App\Controller\EasyAdmin\UserCrudController;
 use App\DataFixtures\AppFixtures;
 use App\Entity\User;
-use App\Tests\EasyAdmin\BaseAdminUserDataTrait;
+use App\Tests\EasyAdmin\EasyAdminUserDataTrait;
 use App\Tests\EasyAdmin\BaseEasyAdminWebTestCase;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 
 class UserCRUDIndexTest extends BaseEasyAdminWebTestCase
 {
-    use BaseAdminUserDataTrait;
+    use EasyAdminUserDataTrait;
 
     /**
      * @test

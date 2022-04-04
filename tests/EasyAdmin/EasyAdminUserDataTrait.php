@@ -8,7 +8,7 @@ use App\DataFixtures\AppFixtures;
 use App\Entity\User;
 use App\Entity\UserRoles;
 
-trait BaseAdminUserDataTrait
+trait EasyAdminUserDataTrait
 {
     /**
      * @return Array<string, Array<array-key, User>>

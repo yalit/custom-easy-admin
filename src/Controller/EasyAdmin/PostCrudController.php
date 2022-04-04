@@ -12,11 +12,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class PostCrudController extends AbstractCrudController
 {
+    public const STATUS_DATE_FORMAT = 'MMM dd, y HH:mm a';
+
     public static function getEntityFqcn(): string
     {
         return Post::class;
@@ -46,7 +49,7 @@ class PostCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield TranslatedTextField::new('status')->hideOnForm();
+        yield IdField::new('id')->hideOnForm();
         yield TextField::new('title');
         yield TextareaField::new('summary')->hideOnIndex()
             ->setNumOfRows(3)
@@ -56,7 +59,11 @@ class PostCrudController extends AbstractCrudController
             ->setHelp('Use Markdown to format the blog post contents. HTML is allowed too.');
         yield AssociationField::new('author');
         yield AssociationField::new('comments')->onlyOnIndex();
-        yield DateTimeField::new('publishedAt');
+        yield TranslatedTextField::new('status')->hideOnForm();
+        yield DateTimeField::new('statusDate', 'Status Date')
+            ->setFormat(self::STATUS_DATE_FORMAT)
+        ;
         yield AssociationField::new('tags')->hideOnIndex();
     }
+
 }

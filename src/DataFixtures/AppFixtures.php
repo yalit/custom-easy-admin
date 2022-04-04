@@ -19,6 +19,7 @@ use App\Entity\UserRoles;
 use App\Workflow\CommentWorkflow;
 use App\Workflow\PostWorkflow;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -83,12 +84,15 @@ class AppFixtures extends Fixture
 
             $post->setStatus($status);
 
-            $post->setCreatedAt(new DateTime('now - '.$p.'hours'));
+            $post->setCreatedAt(new DateTimeImmutable('now - '.$p.'hours'));
             if ($status !== PostWorkflow::STATUS_DRAFT) {
-                $post->setInReviewAt(new DateTime('now - '.$p.'minutes'));
+                $post->setInReviewAt(new DateTimeImmutable('now - '.$p.'minutes'));
             }
-            if (in_array($status, [PostWorkflow::STATUS_PUBLISHED, PostWorkflow::STATUS_CANCELLED])) {
-                $post->setPublishedAt(new DateTime('now - '.$p.'seconds'));
+            if (in_array($status, [PostWorkflow::STATUS_PUBLISHED])) {
+                $post->setPublishedAt(new DateTimeImmutable('now - '.$p.'seconds'));
+            }
+            if (in_array($status, [PostWorkflow::STATUS_CANCELLED])) {
+                $post->setCancelledAt(new DateTimeImmutable('now - '.$p.'seconds'));
             }
 
             foreach (range(1, 5) as $i) {

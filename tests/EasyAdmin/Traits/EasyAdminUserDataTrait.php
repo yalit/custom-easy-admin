@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\EasyAdmin;
+namespace App\Tests\EasyAdmin\Traits;
 
 use App\DataFixtures\AppFixtures;
 use App\Entity\User;
@@ -32,6 +32,32 @@ trait EasyAdminUserDataTrait
     {
         $roles = [
             UserRoles::ROLE_ADMIN,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getAllPublisherUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_ADMIN,
+            UserRoles::ROLE_PUBLISHER,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getAllEasyAdminGrantedNonPublisherUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_AUTHOR,
+            UserRoles::ROLE_REVIEWER,
         ];
 
         return $this->getFilteredUsersForTests($roles);
@@ -92,10 +118,5 @@ trait EasyAdminUserDataTrait
         $user->setRoles($userData[4]);
 
         return $user;
-    }
-
-    private function getUserFromUserName(string $username): User
-    {
-        return $this->entityManager->getRepository(User::class)->findOneBy(['username' => $username]);
     }
 }

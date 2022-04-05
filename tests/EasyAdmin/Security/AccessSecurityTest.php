@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\EasyAdmin\Security;
 
 use App\Entity\User;
-use App\Tests\EasyAdmin\EasyAdminUserDataTrait;
+use App\Tests\EasyAdmin\Traits\EasyAdminUserDataTrait;
 use App\Tests\EasyAdmin\BaseEasyAdminWebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 

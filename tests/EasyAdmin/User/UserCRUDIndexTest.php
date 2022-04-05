@@ -7,7 +7,7 @@ namespace App\Tests\EasyAdmin\User;
 use App\Controller\EasyAdmin\UserCrudController;
 use App\DataFixtures\AppFixtures;
 use App\Entity\User;
-use App\Tests\EasyAdmin\EasyAdminUserDataTrait;
+use App\Tests\EasyAdmin\Traits\EasyAdminUserDataTrait;
 use App\Tests\EasyAdmin\BaseEasyAdminWebTestCase;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 

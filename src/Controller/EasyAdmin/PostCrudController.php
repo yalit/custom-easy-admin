@@ -4,10 +4,14 @@ namespace App\Controller\EasyAdmin;
 
 use App\Controller\EasyAdmin\Fields\TranslatedTextField;
 use App\Entity\Post;
+use App\Workflow\Actions\PostPublishAction;
+use App\Workflow\WorkflowActioner;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
@@ -15,10 +19,15 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Component\HttpFoundation\Response;
 
-class PostCrudController extends AbstractCrudController
+final class PostCrudController extends AbstractCrudController
 {
     public const STATUS_DATE_FORMAT = 'MMM dd, y HH:mm a';
+
+    public function __construct(private WorkflowActioner $workflowActioner)
+    {
+    }
 
     public static function getEntityFqcn(): string
     {
@@ -28,14 +37,32 @@ class PostCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setDefaultSort(['publishedAt' => 'DESC']);
+            ->setDefaultSort(['publishedAt' => 'DESC'])
+            ;
+    }
+
+    public function configureAssets(Assets $assets): Assets
+    {
+        return parent::configureAssets($assets)
+            ->addWebpackEncoreEntry('easyadmin-post')
+            ;
     }
 
     public function configureActions(Actions $actions): Actions
     {
+        $publishAction = Action::new('post_publish');
+        $publishAction
+            ->linkToCrudAction('postPublish')
+            ->setLabel('post.action.publish')
+            ->displayIf(fn($entity) => $this->workflowActioner->can(PostPublishAction::class, $entity))
+        ;
+
         return $actions
+            ->add(Crud::PAGE_INDEX,  $publishAction)
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->remove(Crud::PAGE_INDEX, Action::DELETE);
+            ->remove(Crud::PAGE_INDEX, Action::DELETE)
+
+            ;
     }
 
     public function configureFilters(Filters $filters): Filters
@@ -66,4 +93,25 @@ class PostCrudController extends AbstractCrudController
         yield AssociationField::new('tags')->hideOnIndex();
     }
 
+
+    public function postPublish(AdminContext $adminContext): Response
+    {
+        /** @var Post $post */
+        $post = $adminContext->getEntity()->getInstance();
+        try {
+            $execution = $this->workflowActioner->execute(PostPublishAction::class, $post);
+        } catch (\Exception $e) {
+            $execution = false;
+        }
+
+        if ($execution) {
+            $messageFlash = sprintf("Post %s has correctly been Published", $post->getTitle());
+        } else {
+            $messageFlash = sprintf("Post %s couldn't be Published", $post->getTitle());
+        }
+
+        $this->addFlash("success", $messageFlash);
+
+        return $this->redirect($adminContext->getReferrer());
+    }
 }

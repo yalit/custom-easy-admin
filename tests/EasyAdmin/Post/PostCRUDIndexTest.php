@@ -7,7 +7,7 @@ namespace App\Tests\EasyAdmin\Post;
 use App\Controller\EasyAdmin\PostCrudController;
 use App\Entity\Post;
 use App\Entity\User;
-use App\Tests\EasyAdmin\EasyAdminUserDataTrait;
+use App\Tests\EasyAdmin\Traits\EasyAdminUserDataTrait;
 use App\Tests\EasyAdmin\BaseEasyAdminWebTestCase;
 use App\Workflow\PostWorkflow;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;

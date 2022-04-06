@@ -9,27 +9,24 @@ use App\Workflow\ActionInterface;
 use App\Workflow\PostWorkflow;
 use Symfony\Component\Workflow\WorkflowInterface;
 
-class PostPublishAction implements ActionInterface
+class PostCancelAction implements ActionInterface
 {
     public function __construct(
-        private WorkflowInterface $postStateMachine,
+        private WorkflowInterface $postStateMachine
     ) {
     }
 
     function supports($actionee): bool
     {
         return $actionee instanceof Post
-            && $this->postStateMachine->can($actionee, PostWorkflow::ACTION_PUBLISH)
+            && $this->postStateMachine->can($actionee, PostWorkflow::ACTION_CANCEL)
             ;
     }
 
-    /**
-     * @param Post $actionee
-     */
     function execute($actionee): bool
     {
-        $this->postStateMachine->apply($actionee, PostWorkflow::ACTION_PUBLISH);
-        $actionee->setPublishedAt(new \DateTimeImmutable());
+        $this->postStateMachine->apply($actionee, PostWorkflow::ACTION_CANCEL);
+        $actionee->setCancelledAt(new \DateTimeImmutable());
         return true;
     }
 }

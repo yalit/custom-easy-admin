@@ -6,7 +6,7 @@ const modal_template = `
                 <h5 id="confirmation-modal-title" class="modal-title">Confirm %%action%% ?</h5>
             </div>
             <div id="confirmation-modal-body" class="modal-body">
-                <p>Do you confirm to %%action%% of %%objectName%%?</p>
+                <p>Do you confirm to %%action%% : %%objectName%% Post?</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="btn-confirm">%%modal_confirm_button%%</button>

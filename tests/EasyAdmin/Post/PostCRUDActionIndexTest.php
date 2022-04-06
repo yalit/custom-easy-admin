@@ -30,25 +30,9 @@ class PostCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
         self::assertSelectorTextContains('h1.title', 'Post');
     }
 
-    /**
-     * @test
-     * @dataProvider getAllEasyAdminGrantedNonPublisherUsers
+    /**************
+     * Publish Action
      */
-    public function publishActionIsNotDisplayedOnInReviewPostForNonPublisher(User $user): void
-    {
-        $this->loginUser($user);
-
-        $this->goToPostIndex();
-
-        /** @var Post $inReviewPost */
-        $inReviewPost = $this->entityManager
-            ->getRepository(Post::class)
-            ->findOneBy(['status' => PostWorkflow::STATUS_IN_REVIEW]);
-
-        self::assertSelectorNotExists(
-            sprintf('tr[data-id="%d"] .actions .action-post_publish', $inReviewPost->getId())
-        );
-    }
 
     /**
      * @test
@@ -66,6 +50,26 @@ class PostCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
             ->findOneBy(['status' => PostWorkflow::STATUS_IN_REVIEW]);
 
         self::assertSelectorExists(
+            sprintf('tr[data-id="%d"] .actions .action-post_publish', $inReviewPost->getId())
+        );
+    }
+
+    /**
+     * @test
+     * @dataProvider getAllEasyAdminGrantedNonPublisherUsers
+     */
+    public function publishActionIsNotDisplayedOnInReviewPostForNonPublisher(User $user): void
+    {
+        $this->loginUser($user);
+
+        $this->goToPostIndex();
+
+        /** @var Post $inReviewPost */
+        $inReviewPost = $this->entityManager
+            ->getRepository(Post::class)
+            ->findOneBy(['status' => PostWorkflow::STATUS_IN_REVIEW]);
+
+        self::assertSelectorNotExists(
             sprintf('tr[data-id="%d"] .actions .action-post_publish', $inReviewPost->getId())
         );
     }
@@ -91,4 +95,72 @@ class PostCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
         self::assertSelectorIsVisible("#btn-confirm");
         self::assertSelectorIsVisible("#btn-cancel");
     }
+
+    /**************
+     * Cancel Action
+     */
+
+    /**
+     * @test
+     * @dataProvider getAllPublisherUsers
+     */
+    public function cancelActionIsDisplayedOnInReviewPostForPublisher(User $user): void
+    {
+        $this->loginUser($user);
+
+        $this->goToPostIndex();
+
+        /** @var Post $inReviewPost */
+        $inReviewPost = $this->entityManager
+            ->getRepository(Post::class)
+            ->findOneBy(['status' => PostWorkflow::STATUS_IN_REVIEW]);
+
+        self::assertSelectorExists(
+            sprintf('tr[data-id="%d"] .actions .action-post_cancel', $inReviewPost->getId())
+        );
+    }
+
+    /**
+     * @test
+     * @dataProvider getAllEasyAdminGrantedNonPublisherUsers
+     */
+    public function cancelActionIsNotDisplayedOnInReviewPostForNonPublisher(User $user): void
+    {
+        $this->loginUser($user);
+
+        $this->goToPostIndex();
+
+        /** @var Post $inReviewPost */
+        $inReviewPost = $this->entityManager
+            ->getRepository(Post::class)
+            ->findOneBy(['status' => PostWorkflow::STATUS_IN_REVIEW]);
+
+        self::assertSelectorNotExists(
+            sprintf('tr[data-id="%d"] .actions .action-post_cancel', $inReviewPost->getId())
+        );
+    }
+
+    /**
+     * @test
+     * @dataProvider getAllPublisherUsers
+     */
+    public function cancelActionNeedConfirmation(User $user): void
+    {
+        $this->loginUser($user);
+
+        $this->goToPostIndex();
+
+        /** @var Post $inReviewPost */
+        $inReviewPost = $this->entityManager
+            ->getRepository(Post::class)
+            ->findOneBy(['status' => PostWorkflow::STATUS_IN_REVIEW]);
+
+        $this->clickOnElementRowAction($inReviewPost->getId(), 'post_cancel');
+        $this->client->waitForVisibility("#confirmation-modal");
+
+        self::assertSelectorIsVisible("#btn-confirm");
+        self::assertSelectorIsVisible("#btn-cancel");
+    }
+
+
 }

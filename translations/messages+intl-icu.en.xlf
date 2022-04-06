@@ -471,7 +471,7 @@
             </trans-unit>
             <trans-unit id="post.action.cancel">
                 <source>post.action.cancel</source>
-                <target>Cancelled</target>
+                <target>Cancel</target>
             </trans-unit>
           
             <trans-unit id="comment.status.created">

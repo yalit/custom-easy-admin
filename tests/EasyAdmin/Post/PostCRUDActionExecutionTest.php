@@ -43,4 +43,30 @@ class PostCRUDActionExecutionTest extends BaseEasyAdminPantherTestCase
         $this->entityManager->refresh($inReviewPost);
         static::assertEquals(PostWorkflow::STATUS_PUBLISHED, $inReviewPost->getStatus());
     }
+
+    /**
+     * @test
+     * @dataProvider getAllPublisherUsers
+     */
+    public function cancelActionIsExecutedAfterConfirmation(User $user): void
+    {
+        $this->loginUser($user);
+
+        $this->goToPostIndex();
+
+        /** @var Post $inReviewPost */
+        $inReviewPost = $this->entityManager
+            ->getRepository(Post::class)
+            ->findOneBy(['status' => PostWorkflow::STATUS_IN_REVIEW]);
+
+        $this->clickOnElementRowAction($inReviewPost->getId(), 'post_cancel');
+        $this->client->waitForVisibility("#confirmation-modal");
+
+        $btnConfirm = $this->client->getCrawler()->filter('#btn-confirm');
+        $btnConfirm->click();
+
+        $this->client->waitForInvisibility('#confirmation-modal');
+        $this->entityManager->refresh($inReviewPost);
+        static::assertEquals(PostWorkflow::STATUS_CANCELLED, $inReviewPost->getStatus());
+    }
 }

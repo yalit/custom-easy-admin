@@ -13,8 +13,9 @@ use Symfony\Component\Security\Core\Security;
 
 class PostVoter extends Voter
 {
-
     public const SHOW = 'easyadmin_show';
+    public const PUBLISH = 'easyadmin_publish';
+    public const CANCEL = 'easyadmin_cancel';
 
     public function __construct(private Security $security)
     {
@@ -22,7 +23,7 @@ class PostVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return $subject instanceof Post && \in_array($attribute, [self::SHOW], true);
+        return $subject instanceof Post && \in_array($attribute, [self::SHOW, self::PUBLISH, self::CANCEL], true);
     }
 
     /**
@@ -37,10 +38,12 @@ class PostVoter extends Voter
             return false;
         }
 
-        if (
-            $this->security->isGranted(UserRoles::ROLE_PUBLISHER)
-            || $this->security->isGranted(UserRoles::ROLE_AUTHOR)
-        ) {
+        if (in_array($attribute, [self::PUBLISH, self::CANCEL, self::SHOW])
+            && $this->security->isGranted(UserRoles::ROLE_PUBLISHER)) {
+            return true;
+        }
+
+        if ($attribute === self::SHOW && $this->security->isGranted(UserRoles::ROLE_AUTHOR)) {
             return true;
         }
 

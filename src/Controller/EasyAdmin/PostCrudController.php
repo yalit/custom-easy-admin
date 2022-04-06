@@ -4,8 +4,8 @@ namespace App\Controller\EasyAdmin;
 
 use App\Controller\EasyAdmin\Fields\TranslatedTextField;
 use App\Entity\Post;
-use App\Entity\UserRoles;
 use App\Security\EasyAdmin\PostVoter;
+use App\Workflow\Actions\PostCancelAction;
 use App\Workflow\Actions\PostPublishAction;
 use App\Workflow\WorkflowActioner;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -53,18 +53,14 @@ final class PostCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        $publishAction = Action::new('post_publish');
-        $publishAction
-            ->linkToCrudAction('postPublish')
-            ->setLabel('post.action.publish')
-            ->displayIf(
-                fn($entity) => null !== $entity
-                    && $this->workflowActioner->can(PostPublishAction::class, $entity)
-            )
-        ;
+        $publishAction = $this->getPublishAction('post_publish');
+        $cancelAction = $this->getCancelAction('post_cancel');
 
         return $actions
             ->add(Crud::PAGE_INDEX,  $publishAction)
+            ->setPermission('post_publish', PostVoter::PUBLISH)
+            ->add(Crud::PAGE_INDEX,  $cancelAction)
+            ->setPermission('post_cancel', PostVoter::CANCEL)
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->remove(Crud::PAGE_INDEX, Action::DELETE)
 
@@ -119,5 +115,54 @@ final class PostCrudController extends AbstractCrudController
         $this->addFlash("success", $messageFlash);
 
         return $this->redirect($adminContext->getReferrer());
+    }
+
+    public function postCancel(AdminContext $adminContext): Response
+    {
+        /** @var Post $post */
+        $post = $adminContext->getEntity()->getInstance();
+        try {
+            $execution = $this->workflowActioner->execute(PostCancelAction::class, $post);
+        } catch (\Exception $e) {
+            $execution = false;
+        }
+
+        if ($execution) {
+            $messageFlash = sprintf("Post %s has correctly been Cancelled", $post->getTitle());
+        } else {
+            $messageFlash = sprintf("Post %s couldn't be Cancelled", $post->getTitle());
+        }
+
+        $this->addFlash("success", $messageFlash);
+
+        return $this->redirect($adminContext->getReferrer());
+    }
+
+    private function getPublishAction(string $name): Action
+    {
+        $publishAction = Action::new($name);
+        $publishAction
+            ->linkToCrudAction('postPublish')
+            ->setLabel('post.action.publish')
+            ->displayIf(
+                fn($entity) => null !== $entity
+                    && $this->workflowActioner->can(PostPublishAction::class, $entity)
+            )
+        ;
+        return $publishAction;
+    }
+
+    private function getCancelAction(string $name): Action
+    {
+        $cancelAction = Action::new($name);
+        $cancelAction
+            ->linkToCrudAction('postCancel')
+            ->setLabel('post.action.cancel')
+            ->displayIf(
+                fn($entity) => null !== $entity
+                    && $this->workflowActioner->can(PostCancelAction::class, $entity)
+            )
+        ;
+        return $cancelAction;
     }
 }

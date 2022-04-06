@@ -4,6 +4,8 @@ namespace App\Controller\EasyAdmin;
 
 use App\Controller\EasyAdmin\Fields\TranslatedTextField;
 use App\Entity\Post;
+use App\Entity\UserRoles;
+use App\Security\EasyAdmin\PostVoter;
 use App\Workflow\Actions\PostPublishAction;
 use App\Workflow\WorkflowActioner;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -38,6 +40,7 @@ final class PostCrudController extends AbstractCrudController
     {
         return $crud
             ->setDefaultSort(['publishedAt' => 'DESC'])
+            ->setEntityPermission(PostVoter::SHOW)
             ;
     }
 
@@ -54,7 +57,10 @@ final class PostCrudController extends AbstractCrudController
         $publishAction
             ->linkToCrudAction('postPublish')
             ->setLabel('post.action.publish')
-            ->displayIf(fn($entity) => $this->workflowActioner->can(PostPublishAction::class, $entity))
+            ->displayIf(
+                fn($entity) => null !== $entity
+                    && $this->workflowActioner->can(PostPublishAction::class, $entity)
+            )
         ;
 
         return $actions

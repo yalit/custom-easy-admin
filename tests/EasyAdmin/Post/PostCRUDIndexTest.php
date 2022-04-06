@@ -15,15 +15,26 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 class PostCRUDIndexTest extends BaseEasyAdminWebTestCase
 {
     use EasyAdminUserDataTrait;
-    /**
-     * 1. status is correctly displayed
-     * 2. correct actions existing for specific users
-     * 3. dates are correctly displayed
-     */
 
     /**
      * @test
-     * @dataProvider getAllEasyAdminUsers
+     * @dataProvider getOnlyReviewerUsers
+     */
+    public function indexDisplaysNoPostForNonPublishers(User $user): void
+    {
+        $this->loginUser($user);
+        $this->getAdminUrl(PostCrudController::class, Action::INDEX);
+
+        $crawler = $this->client->getCrawler();
+        $posts = $crawler->filter("tbody tr.datagrid-row-empty");
+
+        self::assertCount(1, $posts);
+    }
+
+
+    /**
+     * @test
+     * @dataProvider getAllPublisherUsers
      */
     public function indexDisplaysCorrectPostStatuses(User $user): void
     {
@@ -51,7 +62,7 @@ class PostCRUDIndexTest extends BaseEasyAdminWebTestCase
 
     /**
      * @test
-     * @dataProvider getAllEasyAdminUsers
+     * @dataProvider getAllPublisherUsers
      */
     public function indexDisplaysCorrectPostStatusDate(User $user): void
     {

@@ -60,6 +60,9 @@ security:
             # See https://symfony.com/doc/current/security/experimental_authenticators.html#configuring-the-authentication-entry-point
             entry_point: 'form_login'
 
+    access_decision_manager:
+        strategy: unanimous
+
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:

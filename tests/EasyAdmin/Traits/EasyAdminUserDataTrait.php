@@ -40,6 +40,21 @@ trait EasyAdminUserDataTrait
     /**
      * @return Array<string, Array<array-key, User>>
      */
+    public function getOnlyReviewerUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_REVIEWER,
+        ];
+
+        return array_filter(
+            $this->getFilteredUsersForTests($roles),
+            fn ($userArray) => count($userArray[0]->getRoles()) === 1
+        );
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
     public function getAllPublisherUsers(): array
     {
         $roles = [

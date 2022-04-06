@@ -31,7 +31,7 @@ class WorkflowActioner implements ActionerInterface
         }
     }
 
-    public function can(string $actionName, object $actionee): bool
+    public function can(string $actionName, ?object $actionee): bool
     {
         if (!array_key_exists($actionName, $this->actions)) {
             throw new NonExistentActionForWorkflowActioner($actionName);

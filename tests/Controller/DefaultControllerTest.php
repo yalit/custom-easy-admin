@@ -53,7 +53,11 @@ class DefaultControllerTest extends WebTestCase
     {
         $client = static::createClient();
         // the service container is always available via the test client
-        $blogPost = $client->getContainer()->get('doctrine')->getRepository(Post::class)->find(1);
+        $blogPost = $client->getContainer()
+            ->get('doctrine')
+            ->getRepository(Post::class)
+            ->findAll()[0]
+        ;
         $client->request('GET', sprintf('/en/blog/posts/%s', $blogPost->getSlug()));
 
         $this->assertResponseIsSuccessful();

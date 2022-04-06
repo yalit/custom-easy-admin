@@ -13,6 +13,7 @@ namespace App\Tests\Controller;
 
 use App\Entity\Post;
 use App\Pagination\Paginator;
+use App\Tests\EasyAdmin\Traits\DatabaseReloadTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
@@ -27,6 +28,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
  */
 class BlogControllerTest extends WebTestCase
 {
+    use DatabaseReloadTrait;
+
     public function testIndex(): void
     {
         $client = static::createClient();

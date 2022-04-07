@@ -13,6 +13,7 @@ use Symfony\Component\Security\Core\Security;
 
 class PostVoter extends Voter
 {
+    public const CREATE = 'easyadmin_create';
     public const SHOW = 'easyadmin_show';
     public const PUBLISH = 'easyadmin_publish';
     public const CANCEL = 'easyadmin_cancel';
@@ -23,7 +24,10 @@ class PostVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return $subject instanceof Post && \in_array($attribute, [self::SHOW, self::PUBLISH, self::CANCEL], true);
+        return ($subject instanceof Post
+            && \in_array($attribute, [self::SHOW, self::PUBLISH, self::CANCEL], true)
+            || \in_array($attribute, [self::CREATE], true)
+        );
     }
 
     /**
@@ -38,12 +42,45 @@ class PostVoter extends Voter
             return false;
         }
 
-        if (in_array($attribute, [self::PUBLISH, self::CANCEL, self::SHOW])
-            && $this->security->isGranted(UserRoles::ROLE_PUBLISHER)) {
+        return match ($attribute) {
+            self::SHOW => $this->voteOnShow(),
+            self::PUBLISH => $this->voteOnPublish(),
+            self::CREATE => $this->voteOnCreate(),
+            self::CANCEL => $this->voteOnCancel(),
+            default => false,
+        };
+    }
+
+    protected function voteOnShow(): bool
+    {
+        if ($this->security->isGranted(UserRoles::ROLE_AUTHOR) || $this->security->isGranted(UserRoles::ROLE_PUBLISHER)) {
             return true;
         }
 
-        if ($attribute === self::SHOW && $this->security->isGranted(UserRoles::ROLE_AUTHOR)) {
+        return false;
+    }
+
+    protected function voteOnPublish(): bool
+    {
+        if ($this->security->isGranted(UserRoles::ROLE_PUBLISHER)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function voteOnCancel(): bool
+    {
+        if ($this->security->isGranted(UserRoles::ROLE_PUBLISHER)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function voteOnCreate(): bool
+    {
+        if ($this->security->isGranted(UserRoles::ROLE_AUTHOR)) {
             return true;
         }
 

@@ -61,6 +61,7 @@ final class PostCrudController extends AbstractCrudController
             ->setPermission('post_publish', PostVoter::PUBLISH)
             ->add(Crud::PAGE_INDEX,  $cancelAction)
             ->setPermission('post_cancel', PostVoter::CANCEL)
+            ->setPermission(Action::NEW, PostVoter::CREATE)
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->remove(Crud::PAGE_INDEX, Action::DELETE)
 

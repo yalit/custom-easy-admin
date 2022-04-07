@@ -68,6 +68,33 @@ trait EasyAdminUserDataTrait
     /**
      * @return Array<string, Array<array-key, User>>
      */
+    public function getAllAuthorUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_ADMIN,
+            UserRoles::ROLE_AUTHOR,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getEasyAdminAllNonAuthorUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_ADMIN,
+            UserRoles::ROLE_AUTHOR,
+            UserRoles::ROLE_USER
+        ];
+
+        return $this->getAntiFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
     public function getAllEasyAdminGrantedNonPublisherUsers(): array
     {
         $roles = [
@@ -112,6 +139,18 @@ trait EasyAdminUserDataTrait
         return array_map(fn($user) => [$user], array_filter(
             $this->getUsersFromUserData(),
             fn(User $user) => count(array_intersect($roles,$user->getRoles())) > 0
+        ));
+    }
+
+    /**
+     * @param Array<array-key, string> $roles
+     * @return Array<string, Array<array-key, User>>
+     */
+    private function getAntiFilteredUsersForTests(array $roles): array
+    {
+        return array_map(fn($user) => [$user], array_filter(
+            $this->getUsersFromUserData(),
+            fn(User $user) => count(array_intersect($roles,$user->getRoles())) === 0
         ));
     }
 

@@ -150,5 +150,33 @@ class PostCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
         self::assertSelectorIsVisible("#btn-cancel");
     }
 
+    /***********
+     * Create
+     */
 
+    /**
+     * @test
+     * @dataProvider getAllAuthorUsers
+     */
+    public function authorsCanCreatePosts(User $user): void
+    {
+        $this->loginUser($user);
+        $this->goToPostIndex();
+
+        $createButton = $this->client->getCrawler()->filter('a.action-new');
+        self::assertCount(1, $createButton);
+    }
+
+    /**
+     * @test
+     * @dataProvider getEasyAdminAllNonAuthorUsers
+     */
+    public function nonAuthorsCannotCreatePosts(User $user): void
+    {
+        $this->loginUser($user);
+        $this->goToPostIndex();
+
+        $createButton = $this->client->getCrawler()->filter('a.action-new');
+        self::assertCount(0, $createButton);
+    }
 }

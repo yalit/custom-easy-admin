@@ -12,7 +12,7 @@ I'll try to define specific branches with each time the updates made for a speci
 - restrict access at Action level ==> done in branch : 01.only_admin_can_update_users 
 
 ### 2. Fields
-- custom Field within listing/index
+- custom Field within listing/index ==> done in branch : 02.Post_Workflow_Listing
 - custom Field within Form (new/update)
 - unmapped field on specific entity ==> done in branch : 02.Post_Workflow_Listing
 

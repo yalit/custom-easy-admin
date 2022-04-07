@@ -8,7 +8,7 @@ I'll try to define specific branches with each time the updates made for a speci
 
 ## CRUD level
 ### 1. Security
-- restrict access at entity level
+- restrict access at entity level ==> done in branch : 02.Post_Workflow_Listing
 - restrict access at Action level ==> done in branch : 01.only_admin_can_update_users 
 
 ### 2. Fields
@@ -19,7 +19,7 @@ I'll try to define specific branches with each time the updates made for a speci
 ### 3. Listing
 #### a. Data table
 - show only a part of the data (filtering)
-  - based on security
+  - based on security ==> done in branch : 02.Post_Workflow_Listing
   - based on queryBuilder
 - specific sort of data tables
 - update design of the table
@@ -29,7 +29,7 @@ I'll try to define specific branches with each time the updates made for a speci
 - define custom Filters
 
 #### b. Actions
-- define custom entity action
+- define custom entity action ==> done in branch : 02.Post_Workflow_Listing
   - including export of data into csv/excel using filters
 - define custom bulk action
 
@@ -44,6 +44,7 @@ I'll try to define specific branches with each time the updates made for a speci
 
 ### 5. Assets
 - specific assets (js/css) at all levels
+  - addition of assets for specific CRUD ==> done in branch : 02.Post_Workflow_Listing
 
 
 I'll try to document it also as a blog posts here : [Yalit's Blog][1]

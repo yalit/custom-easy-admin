@@ -18,18 +18,6 @@ class PostCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
     use EasyAdminRoutingTrait;
     use EasyAdminActionTrait;
 
-    /**
-     * @test
-     * @dataProvider getAllEasyAdminUsers
-     */
-    public function indexOKWithPanther(User $user): void
-    {
-        $this->loginUser($user);
-
-        self::assertSelectorIsVisible('h1.title');
-        self::assertSelectorTextContains('h1.title', 'Post');
-    }
-
     /**************
      * Publish Action
      */

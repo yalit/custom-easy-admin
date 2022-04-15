@@ -8,21 +8,26 @@ use App\Entity\User;
 use App\Tests\EasyAdmin\Traits\DatabaseReloadTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Panther\Client;
+use Symfony\Component\Panther\PantherTestCase;
 
-abstract class BaseEasyAdminWebTestCase extends WebTestCase implements BaseAdminTest
+abstract class BaseEasyAdminPantherTestCase extends PantherTestCase implements BaseAdminTest
 {
     use DatabaseReloadTrait;
 
-    protected KernelBrowser $client;
+    protected const EA_URL = '/en/easyadmin';
+
+    protected Client $client;
     protected AdminUrlGenerator $adminUrlGenerator;
     protected EntityManagerInterface $entityManager;
+    protected bool $logged = false;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->client = static::createClient();
+        $this->client = static::createPantherClient([
+            'browser' => PantherTestCase::FIREFOX,
+        ]);
         $this->adminUrlGenerator = static::getContainer()->get(AdminUrlGenerator::class);
         $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
     }
@@ -30,6 +35,10 @@ abstract class BaseEasyAdminWebTestCase extends WebTestCase implements BaseAdmin
     protected function tearDown(): void
     {
         parent::tearDown();
+        if ($this->logged) {
+            $this->client->request('GET', '/en/logout');
+            $this->logged = false;
+        }
         unset($this->client);
         unset($this->adminUrlGenerator);
         unset($this->entityManager);
@@ -37,24 +46,20 @@ abstract class BaseEasyAdminWebTestCase extends WebTestCase implements BaseAdmin
 
     public function loginUser(User $user): void
     {
-        TestLoginHelpers::loginKernelBrowser(
+        TestLoginHelpers::loginWebDriver(
             $this->client,
             $user->getUsername(),
             $user->getPassword(),
             '/en/easyadmin'
         );
 
-        $this->client->followRedirect();
+        $this->logged = true;
+
+        $this->client->request('GET', self::EA_URL);
     }
 
     public function getAdminUrl(string $CRUDControllerFqcn, string $action, string $entityId = null)
     {
-        $this->adminUrlGenerator->setController($CRUDControllerFqcn)->setAction($action);
-
-        if (null !== $entityId) {
-            $this->adminUrlGenerator->setEntityId($entityId);
-        }
-
-        $this->client->request('GET', $this->adminUrlGenerator->generateUrl());
+        throw new \Exception("Not compatible with EasyAdmin URL Generator");
     }
 }

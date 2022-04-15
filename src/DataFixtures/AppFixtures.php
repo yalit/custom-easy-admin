@@ -19,6 +19,7 @@ use App\Entity\UserRoles;
 use App\Workflow\CommentWorkflow;
 use App\Workflow\PostWorkflow;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -83,12 +84,15 @@ class AppFixtures extends Fixture
 
             $post->setStatus($status);
 
-            $post->setCreatedAt(new DateTime('now - '.$p.'hours'));
+            $post->setCreatedAt(new DateTimeImmutable('now - '.$p.'hours'));
             if ($status !== PostWorkflow::STATUS_DRAFT) {
-                $post->setInReviewAt(new DateTime('now - '.$p.'minutes'));
+                $post->setInReviewAt(new DateTimeImmutable('now - '.$p.'minutes'));
             }
-            if (in_array($status, [PostWorkflow::STATUS_PUBLISHED, PostWorkflow::STATUS_CANCELLED])) {
-                $post->setPublishedAt(new DateTime('now - '.$p.'seconds'));
+            if (in_array($status, [PostWorkflow::STATUS_PUBLISHED])) {
+                $post->setPublishedAt(new DateTimeImmutable('now - '.$p.'seconds'));
+            }
+            if (in_array($status, [PostWorkflow::STATUS_CANCELLED])) {
+                $post->setCancelledAt(new DateTimeImmutable('now - '.$p.'seconds'));
             }
 
             foreach (range(1, 5) as $i) {
@@ -178,6 +182,36 @@ class AppFixtures extends Fixture
     {
         return [
             'Lorem ipsum dolor sit amet consectetur adipiscing elit',
+            'Pellentesque vitae velit ex',
+            'Mauris dapibus risus quis suscipit vulputate',
+            'Eros diam egestas libero eu vulputate risus',
+            'In hac habitasse platea dictumst',
+            'Morbi tempus commodo mattis',
+            'Ut suscipit posuere justo at vulputate',
+            'Ut eleifend mauris et risus ultrices egestas',
+            'Aliquam sodales odio id eleifend tristique',
+            'Urna nisl sollicitudin id varius orci quam id turpis',
+            'Nulla porta lobortis ligula vel egestas',
+            'Curabitur aliquam euismod dolor non ornare',
+            'Sed varius a risus eget aliquam',
+            'Nunc viverra elit ac laoreet suscipit',
+            'Pellentesque et sapien pulvinar consectetur',
+            'Ubi est barbatus nix',
+            'Abnobas sunt hilotaes de placidus vita',
+            'Ubi est audax amicitia',
+            'Eposs sunt solems de superbus fortis',
+            'Vae humani generis',
+            'Diatrias tolerare tanquam noster caesium',
+            'Teres talis saepe tractare de camerarius flavum sensorem',
+            'Silva de secundus galatae demitto quadra',
+            'Sunt accentores vitare salvus flavum parses',
+            'Potus sensim ad ferox abnoba',
+            'Sunt seculaes transferre talis camerarius fluctuies',
+            'Era brevis ratione est',
+            'Sunt torquises imitari velox mirabilis medicinaes',
+            'Mineralis persuadere omnes finises desiderium',
+            'Bassus fatalis classiss virtualiter transferre de flavum',
+            'Lore ipsum dolor sit amet consectetur adipiscing elit',
             'Pellentesque vitae velit ex',
             'Mauris dapibus risus quis suscipit vulputate',
             'Eros diam egestas libero eu vulputate risus',

@@ -46,7 +46,7 @@ security:
                 enable_csrf: true
                 # The page users are redirect to when there is no previous page stored in the
                 # session (for example when the users access directly to the login page).
-                default_target_path: blog_index
+                default_target_path: easyadmin
 
             logout:
                 # The route name the user can go to in order to logout
@@ -59,6 +59,9 @@ security:
             # multiple authenticators
             # See https://symfony.com/doc/current/security/experimental_authenticators.html#configuring-the-authentication-entry-point
             entry_point: 'form_login'
+
+    access_decision_manager:
+        strategy: unanimous
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used

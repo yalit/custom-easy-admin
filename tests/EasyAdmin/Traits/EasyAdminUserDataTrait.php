@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\EasyAdmin;
+namespace App\Tests\EasyAdmin\Traits;
 
 use App\DataFixtures\AppFixtures;
 use App\Entity\User;
 use App\Entity\UserRoles;
 
-trait BaseAdminUserDataTrait
+trait EasyAdminUserDataTrait
 {
     /**
      * @return Array<string, Array<array-key, User>>
@@ -32,6 +32,74 @@ trait BaseAdminUserDataTrait
     {
         $roles = [
             UserRoles::ROLE_ADMIN,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getOnlyReviewerUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_REVIEWER,
+        ];
+
+        return array_filter(
+            $this->getFilteredUsersForTests($roles),
+            fn ($userArray) => count($userArray[0]->getRoles()) === 1
+        );
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getAllPublisherUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_ADMIN,
+            UserRoles::ROLE_PUBLISHER,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getAllAuthorUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_ADMIN,
+            UserRoles::ROLE_AUTHOR,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getEasyAdminAllNonAuthorUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_ADMIN,
+            UserRoles::ROLE_AUTHOR,
+            UserRoles::ROLE_USER
+        ];
+
+        return $this->getAntiFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getAllEasyAdminGrantedNonPublisherUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_AUTHOR,
+            UserRoles::ROLE_REVIEWER,
         ];
 
         return $this->getFilteredUsersForTests($roles);
@@ -75,6 +143,18 @@ trait BaseAdminUserDataTrait
     }
 
     /**
+     * @param Array<array-key, string> $roles
+     * @return Array<string, Array<array-key, User>>
+     */
+    private function getAntiFilteredUsersForTests(array $roles): array
+    {
+        return array_map(fn($user) => [$user], array_filter(
+            $this->getUsersFromUserData(),
+            fn(User $user) => count(array_intersect($roles,$user->getRoles())) === 0
+        ));
+    }
+
+    /**
      * @return Array<User>
      */
     private function getUsersFromUserData(): array
@@ -92,10 +172,5 @@ trait BaseAdminUserDataTrait
         $user->setRoles($userData[4]);
 
         return $user;
-    }
-
-    private function getUserFromUserName(string $username): User
-    {
-        return $this->entityManager->getRepository(User::class)->findOneBy(['username' => $username]);
     }
 }

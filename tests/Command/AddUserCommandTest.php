@@ -13,8 +13,9 @@ namespace App\Tests\Command;
 
 use App\Command\AddUserCommand;
 use App\Repository\UserRepository;
+use App\Tests\EasyAdmin\Traits\DatabaseReloadTrait;
 
-class AddUserCommandTest extends AbstractCommandTest
+class AddUserCommandTest extends AbstractDBReloadedCommandTest
 {
     private $userData = [
         'username' => 'chuck_norris',

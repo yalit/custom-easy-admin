@@ -12,6 +12,7 @@
 namespace App\Tests\Controller\Admin;
 
 use App\Repository\PostRepository;
+use App\Tests\EasyAdmin\Traits\DatabaseReloadTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,6 +33,8 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class BlogControllerTest extends WebTestCase
 {
+    use DatabaseReloadTrait;
+
     /**
      * @dataProvider getUrlsForRegularUsers
      */

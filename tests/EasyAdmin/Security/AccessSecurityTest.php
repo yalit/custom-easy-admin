@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EasyAdmin\Security;
 
 use App\Entity\User;
-use App\Tests\EasyAdmin\BaseAdminUserDataTrait;
+use App\Tests\EasyAdmin\Traits\EasyAdminUserDataTrait;
 use App\Tests\EasyAdmin\BaseEasyAdminWebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
 class AccessSecurityTest extends BaseEasyAdminWebTestCase
 {
-    use BaseAdminUserDataTrait;
+    use EasyAdminUserDataTrait;
 
     /**
      * @test

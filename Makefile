@@ -31,7 +31,7 @@ tests-prepare:
 	bin/console d:f:l -n --env=test
 	vendor/bin/bdi detect drivers
 
-tests:
+test:
 	bin/phpunit
 
 lint-yaml:

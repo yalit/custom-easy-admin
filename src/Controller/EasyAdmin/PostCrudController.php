@@ -94,12 +94,13 @@ final class PostCrudController extends AbstractCrudController
         yield CodeEditorField::new('content')->hideOnIndex()
             ->setNumOfRows(15)->setLanguage('markdown')
             ->setHelp('Use Markdown to format the blog post contents. HTML is allowed too.');
-        yield AssociationField::new('author');
+        yield AssociationField::new('author')->hideOnForm();
         yield AssociationField::new('comments')->onlyOnIndex();
         // Set up a custom field for the display of the status on the index
         yield TranslatedTextField::new('status')->hideOnForm();
         yield DateTimeField::new('statusDate', 'Status Date')
             ->setFormat(self::STATUS_DATE_FORMAT)
+            ->hideOnForm()
         ;
         yield AssociationField::new('tags')->hideOnIndex();
     }

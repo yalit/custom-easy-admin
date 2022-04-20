@@ -4,6 +4,8 @@ namespace App\Controller\EasyAdmin;
 
 use App\Controller\EasyAdmin\Fields\TranslatedTextField;
 use App\Entity\Post;
+use App\Form\CommentType;
+use App\Form\TagType;
 use App\Security\EasyAdmin\PostVoter;
 use App\Workflow\Actions\PostCancelAction;
 use App\Workflow\Actions\PostPublishAction;
@@ -18,6 +20,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
@@ -43,6 +46,8 @@ final class PostCrudController extends AbstractCrudController
             ->setDefaultSort(['publishedAt' => 'DESC'])
             // set for the entire entity (for any instance) the needed permission by using a Custom Voter
             ->setEntityPermission(PostVoter::SHOW)
+            // addition of a new form theme file containing the custom collection row definition
+            ->setFormThemes(['easyadmin/form/custom_post_form.html.twig', '@EasyAdmin/crud/form_theme.html.twig'])
             ;
     }
 
@@ -102,7 +107,13 @@ final class PostCrudController extends AbstractCrudController
             ->setFormat(self::STATUS_DATE_FORMAT)
             ->hideOnForm()
         ;
-        yield AssociationField::new('tags')->hideOnIndex();
+        yield AssociationField::new('tags');
+        yield CollectionField::new('comments')
+            // defines a specific custom block name (for the overwrite)
+            ->setFormTypeOption('block_name', 'custom_collection_comments')
+            // defines the type of Form of each entry of the Collection
+            ->setEntryType(CommentType::class)
+        ;
     }
 
     /**

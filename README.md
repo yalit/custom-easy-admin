@@ -9,6 +9,7 @@ Documentation
 ------------
 
 All the documentation bout the objectives and update of the project can be found here : [docs](doc/objectives.md)
+
 Requirements
 ------------
 

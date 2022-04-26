@@ -10,6 +10,8 @@ Documentation
 
 All the documentation bout the objectives and update of the project can be found here : [docs](doc/objectives.md)
 
+I also document each different major branches on a blog to describe it more in details here : [my blog][8]
+
 Requirements
 ------------
 
@@ -77,3 +79,4 @@ $ make test
 [5]: https://symfony.com/download
 [6]: https://symfony.com/doc/current/cookbook/configuration/web_server_configuration.html
 [7]: https://github.com/EasyCorp/easyadmin-demo
+[8]: https://yalit.be/blog/2022/04/07/symfony-easyadmin-space-for-extra-functionalities/

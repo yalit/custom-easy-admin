@@ -13,7 +13,7 @@ I'll try to define specific branches with each time the updates made for a speci
 
 ### 2. Fields
 - custom Field within listing/index ==> done in branch : 02.Post_Workflow_Listing
-- custom Field within Form (new/update)
+- custom Field within Form (new/update) ==> done in branch : 03.custom_collection_field_form
 - unmapped field on specific entity ==> done in branch : 02.Post_Workflow_Listing
 
 ### 3. Listing

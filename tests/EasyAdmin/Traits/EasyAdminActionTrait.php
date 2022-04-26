@@ -15,6 +15,7 @@ trait EasyAdminActionTrait
         $dropdownButton->getLocationOnScreenOnceScrolledIntoView();
         $dropdownButton->click();
         $this->client->waitForVisibility($elementRowSelector." .dropdown-menu");
+        $dropdownButton->getLocationOnScreenOnceScrolledIntoView();
 
         $actionButton = $crawler->filter($elementRowSelector." .actions .action-".$action);
         $actionButton->click();

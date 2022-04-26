@@ -58,7 +58,7 @@ abstract class BaseEasyAdminPantherTestCase extends PantherTestCase implements B
         $this->client->request('GET', self::EA_URL);
     }
 
-    public function getAdminUrl(string $CRUDControllerFqcn, string $action, string $entityId = null)
+    public function getAdminUrl(string $CRUDControllerClass, string $action, string $entityId = null)
     {
         throw new \Exception("Not compatible with EasyAdmin URL Generator");
     }

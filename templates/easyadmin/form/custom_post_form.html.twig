@@ -1,0 +1,30 @@
+{# This is not pretty nor useful as the current Collection field is working pretty well but it demonstrates the point of the overwrite #}
+{% block _Post_custom_collection_comments_row %}
+    {% import _self as macros %}
+    <h5>{{ form.vars.label}}</h5>
+    <div
+            class="custom_collection"
+            data-prototype="{{ form_widget(prototype) | e('html_attr') }}"
+            data-index="{{ form.children | length }}"
+    >
+        {% for child in form.children %}
+            {{ form_widget(child) }}
+        {% endfor %}
+        <div class="custom_collection_row new_item_row">
+            <span class="add_row fa fa-plus"></span> <span>Add a new comment</span>
+        </div>
+    </div>
+{% endblock %}
+
+{# We need to overwrite completely otherwise the EasyAdmin entry_widget will be used as well #}
+{% block _Post_custom_collection_comments_entry_widget %}
+    <div class="custom_collection_row">
+        <span class="remove_row fa fa-minus"></span>
+        <textarea
+                name="{{ form.content.vars.full_name }}"
+                id="{{ form.content.vars.id }}"
+                cols="50"
+                rows="4"
+        >{{ form.content.vars.value }}</textarea>
+    </div>
+{% endblock %}

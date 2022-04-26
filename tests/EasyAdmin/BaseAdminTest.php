@@ -9,5 +9,5 @@ use App\Entity\User;
 interface BaseAdminTest
 {
     function loginUser(User $user): void;
-    function getAdminUrl(string $CRUDControllerFqcn, string $action, string $id = null);
+    function getAdminUrl(string $CRUDControllerClass, string $action, string $id = null);
 }

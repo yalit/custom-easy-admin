@@ -47,9 +47,9 @@ abstract class BaseEasyAdminWebTestCase extends WebTestCase implements BaseAdmin
         $this->client->followRedirect();
     }
 
-    public function getAdminUrl(string $CRUDControllerFqcn, string $action, string $entityId = null)
+    public function getAdminUrl(string $CRUDControllerClass, string $action, string $entityId = null)
     {
-        $this->adminUrlGenerator->setController($CRUDControllerFqcn)->setAction($action);
+        $this->adminUrlGenerator->setController($CRUDControllerClass)->setAction($action);
 
         if (null !== $entityId) {
             $this->adminUrlGenerator->setEntityId($entityId);

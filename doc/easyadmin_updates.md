@@ -22,8 +22,6 @@ I'll try to define specific branches with each time the updates made for a speci
   - based on security ==> done in branch : 02.Post_Workflow_Listing
   - based on queryBuilder
 - specific sort of data tables
-- update design of the table
-- format field value specifically
 
 #### b. Filters
 - define custom Filters

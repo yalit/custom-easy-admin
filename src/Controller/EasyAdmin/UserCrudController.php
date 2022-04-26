@@ -56,7 +56,9 @@ class UserCrudController extends AbstractCrudController
         yield TextField::new('username');
         yield EmailField::new('email');
         yield ChoiceField::new('roles')
+            ->allowMultipleChoices(true)
             ->setChoices(UserRoles::getAllRoles())
+            ->setRequired(false)
         ;
     }
 }

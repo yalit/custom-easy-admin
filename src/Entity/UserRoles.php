@@ -31,7 +31,6 @@ class UserRoles
             'Author' => self::ROLE_AUTHOR,
             'Publisher' => self::ROLE_PUBLISHER,
             'Reviewer' => self::ROLE_REVIEWER,
-            'User' => self::ROLE_USER,
         ];
     }
 }

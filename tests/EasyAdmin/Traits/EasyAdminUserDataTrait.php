@@ -40,6 +40,19 @@ trait EasyAdminUserDataTrait
     /**
      * @return Array<string, Array<array-key, User>>
      */
+    public function getAllReviewerUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_ADMIN,
+            UserRoles::ROLE_REVIEWER
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
     public function getOnlyReviewerUsers(): array
     {
         $roles = [
@@ -100,6 +113,19 @@ trait EasyAdminUserDataTrait
         $roles = [
             UserRoles::ROLE_AUTHOR,
             UserRoles::ROLE_REVIEWER,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getAllEasyAdminGrantedNonReviewerUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_AUTHOR,
+            UserRoles::ROLE_PUBLISHER,
         ];
 
         return $this->getFilteredUsersForTests($roles);

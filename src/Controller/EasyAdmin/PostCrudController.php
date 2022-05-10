@@ -117,7 +117,7 @@ final class PostCrudController extends AbstractCrudController
     }
 
     /**
-     * Specific action linked to the post_cancel action created below
+     * Specific action linked to the post_publish action created below
      * Any process can be triggered here using DI
      */
     public function postPublish(AdminContext $adminContext): Response

@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\EasyAdmin\Post;
+namespace App\Tests\EasyAdmin\Comment;
 
-use App\Entity\Post;
+use App\Entity\Comment;
 use App\Entity\User;
 use App\Tests\EasyAdmin\BaseEasyAdminPantherTestCase;
 use App\Tests\EasyAdmin\Traits\EasyAdminActionTrait;
 use App\Tests\EasyAdmin\Traits\EasyAdminRoutingTrait;
 use App\Tests\EasyAdmin\Traits\EasyAdminUserDataTrait;
-use App\Workflow\PostWorkflow;
+use App\Workflow\CommentWorkflow;
+use Facebook\WebDriver\Remote\RemoteWebElement;
 
 class CommentCRUDActionExecutionTest extends BaseEasyAdminPantherTestCase
 {
@@ -20,53 +21,79 @@ class CommentCRUDActionExecutionTest extends BaseEasyAdminPantherTestCase
 
     /**
      * @test
-     * @dataProvider getAllPublisherUsers
+     * @dataProvider getAllReviewerUsers
      */
     public function publishActionIsExecutedAfterConfirmation(User $user): void
     {
         $this->loginUser($user);
 
-        $this->goToPostIndex();
+        $this->goToCommentIndex();
 
-        /** @var Post $inReviewPost */
-        $inReviewPost = $this->entityManager
-            ->getRepository(Post::class)
-            ->findOneBy(['status' => PostWorkflow::STATUS_IN_REVIEW]);
+        $createdCommentRows = $this->client
+            ->getCrawler()
+            ->filter(sprintf('tbody tr'));
 
-        $this->clickOnElementRowAction($inReviewPost->getId(), 'post_publish');
-        $this->client->waitForVisibility("#confirmation-modal");
+        /** @var RemoteWebElement $commentRow */
+        foreach ($createdCommentRows as $commentRow) {
+            $commentId = $commentRow->getAttribute('data-id');
 
-        $btnConfirm = $this->client->getCrawler()->filter('#btn-confirm');
-        $btnConfirm->click();
+            $createdComment = $this->entityManager->getRepository(Comment::class)->find($commentId);
 
-        $this->client->waitForInvisibility('#confirmation-modal');
-        $this->entityManager->refresh($inReviewPost);
-        static::assertEquals(PostWorkflow::STATUS_PUBLISHED, $inReviewPost->getStatus());
+            $commentRowStatus = $this->client->getCrawler()->filter(sprintf('tr[data-id="%s"] span[title="%s"]', $commentId, CommentWorkflow::STATUS_CREATED));
+            if (count($commentRowStatus) === 0) {
+                continue;
+            }
+
+            $this->clickOnElementRowAction((int)$commentId, 'comment_publish');
+            $this->client->waitForVisibility("#confirmation-modal");
+
+            $btnConfirm = $this->client->getCrawler()->filter('#btn-confirm');
+            $btnConfirm->click();
+
+            $this->client->waitForInvisibility('#confirmation-modal');
+            $this->entityManager->refresh($createdComment);
+            static::assertEquals(CommentWorkflow::STATUS_PUBLISHED, $createdComment->getStatus());
+
+            break;
+        }
     }
 
     /**
      * @test
-     * @dataProvider getAllPublisherUsers
+     * @dataProvider getAllReviewerUsers
      */
-    public function cancelActionIsExecutedAfterConfirmation(User $user): void
+    public function commentActionIsExecutedAfterConfirmation(User $user): void
     {
         $this->loginUser($user);
 
-        $this->goToPostIndex();
+        $this->goToCommentIndex();
 
-        /** @var Post $inReviewPost */
-        $inReviewPost = $this->entityManager
-            ->getRepository(Post::class)
-            ->findOneBy(['status' => PostWorkflow::STATUS_IN_REVIEW]);
+        $createdCommentRows = $this->client
+            ->getCrawler()
+            ->filter(sprintf('tbody tr'));
 
-        $this->clickOnElementRowAction($inReviewPost->getId(), 'post_cancel');
-        $this->client->waitForVisibility("#confirmation-modal");
+        /** @var RemoteWebElement $commentRow */
+        foreach ($createdCommentRows as $commentRow) {
+            $commentId = $commentRow->getAttribute('data-id');
 
-        $btnConfirm = $this->client->getCrawler()->filter('#btn-confirm');
-        $btnConfirm->click();
+            $createdComment = $this->entityManager->getRepository(Comment::class)->find($commentId);
 
-        $this->client->waitForInvisibility('#confirmation-modal');
-        $this->entityManager->refresh($inReviewPost);
-        static::assertEquals(PostWorkflow::STATUS_CANCELLED, $inReviewPost->getStatus());
+            $commentRowStatus = $this->client->getCrawler()->filter(sprintf('tr[data-id="%s"] span[title="%s"]', $commentId, CommentWorkflow::STATUS_CREATED));
+            if (count($commentRowStatus) === 0) {
+                continue;
+            }
+
+            $this->clickOnElementRowAction((int)$commentId, 'comment_cancel');
+            $this->client->waitForVisibility("#confirmation-modal");
+
+            $btnConfirm = $this->client->getCrawler()->filter('#btn-confirm');
+            $btnConfirm->click();
+
+            $this->client->waitForInvisibility('#confirmation-modal');
+            $this->entityManager->refresh($createdComment);
+            static::assertEquals(CommentWorkflow::STATUS_CANCELLED, $createdComment->getStatus());
+
+            break;
+        }
     }
 }

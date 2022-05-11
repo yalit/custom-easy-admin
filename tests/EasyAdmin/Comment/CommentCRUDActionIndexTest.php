@@ -84,6 +84,79 @@ class CommentCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
 
     /**
      * @test
+     * @dataProvider getAllEasyAdminGrantedNonReviewerUsers
+     */
+    public function publishActionIsNotDisplayedOnCommentForNonReviewer(User $user): void
+    {
+        $this->loginUser($user);
+
+        $this->goToCommentIndex();
+
+        $createdCommentRows = $this->client
+            ->getCrawler()
+            ->filter(sprintf('tbody tr'));
+
+        /** @var RemoteWebElement $commentRow */
+        foreach ($createdCommentRows as $commentRow) {
+            $commentId = $commentRow->getAttribute('data-id');
+
+            $commentRowStatus = $this->client->getCrawler()->filter(sprintf('tr[data-id="%s"] span[title="%s"]', $commentId, CommentWorkflow::STATUS_PUBLISHED));
+            if (count($commentRowStatus) === 0) {
+                continue;
+            }
+
+            self::assertSelectorNotExists(
+                sprintf('tr[data-id="%d"] .actions .action-comment_publish', $commentId)
+            );
+        }
+
+        /** @var RemoteWebElement $commentRow */
+        foreach ($createdCommentRows as $commentRow) {
+            $commentId = $commentRow->getAttribute('data-id');
+
+            $commentRowStatus = $this->client->getCrawler()->filter(sprintf('tr[data-id="%s"] span[title="%s"]', $commentId, CommentWorkflow::STATUS_CANCELLED));
+            if (count($commentRowStatus) === 0) {
+                continue;
+            }
+
+            self::assertSelectorNotExists(
+                sprintf('tr[data-id="%d"] .actions .action-comment_publish', $commentId)
+            );
+        }
+    }
+
+    /**
+     * @test
+     * @dataProvider getAllEasyAdminGrantedNonReviewerUsers
+     */
+    public function cancelActionIsNotDisplayedOnCommentForNonReviewer(User $user): void
+    {
+        $this->loginUser($user);
+
+        $this->goToCommentIndex();
+
+        $createdCommentRows = $this->client
+            ->getCrawler()
+            ->filter(sprintf('tbody tr'));
+
+        /** @var RemoteWebElement $commentRow */
+        foreach ($createdCommentRows as $commentRow) {
+            $commentId = $commentRow->getAttribute('data-id');
+
+            $commentRowStatus = $this->client->getCrawler()->filter(sprintf('tr[data-id="%s"] span[title="%s"]', $commentId, CommentWorkflow::STATUS_CREATED));
+            if (count($commentRowStatus) === 0) {
+                continue;
+            }
+
+
+            self::assertSelectorNotExists(
+                sprintf('tr[data-id="%d"] .actions .action-comment_cancel', $commentId)
+            );
+        }
+    }
+
+    /**
+     * @test
      * @dataProvider getAllReviewerUsers
      */
     public function publishActionNeedConfirmation(User $user): void
@@ -105,12 +178,46 @@ class CommentCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
                 continue;
             }
 
-            $this->clickOnElementRowAction((int)$commentId, 'post_publish');
+            $this->clickOnElementRowAction((int)$commentId, 'comment_publish');
             $this->client->waitForVisibility("#confirmation-modal");
 
             self::assertSelectorIsVisible("#btn-confirm");
             self::assertSelectorIsVisible("#btn-cancel");
-            $this->client->getCrawler()
+            $this->client->getCrawler()->filter("#btn-cancel")->click();
+            $this->client->waitForInvisibility("#confirmation-modal");
+        }
+    }
+
+    /**
+     * @test
+     * @dataProvider getAllReviewerUsers
+     */
+    public function cancelActionNeedConfirmation(User $user): void
+    {
+        $this->loginUser($user);
+
+        $this->goToCommentIndex();
+
+        $createdCommentRows = $this->client
+            ->getCrawler()
+            ->filter(sprintf('tbody tr'));
+
+        /** @var RemoteWebElement $commentRow */
+        foreach ($createdCommentRows as $commentRow) {
+            $commentId = $commentRow->getAttribute('data-id');
+
+            $commentRowStatus = $this->client->getCrawler()->filter(sprintf('tr[data-id="%s"] span[title="%s"]', $commentId, CommentWorkflow::STATUS_CREATED));
+            if (count($commentRowStatus) === 0) {
+                continue;
+            }
+
+            $this->clickOnElementRowAction((int)$commentId, 'comment_cancel');
+            $this->client->waitForVisibility("#confirmation-modal");
+
+            self::assertSelectorIsVisible("#btn-confirm");
+            self::assertSelectorIsVisible("#btn-cancel");
+            $this->client->getCrawler()->filter("#btn-cancel")->click();
+            $this->client->waitForInvisibility("#confirmation-modal");
         }
     }
 }

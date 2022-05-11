@@ -24,6 +24,7 @@ Encore
     .addEntry('login', './assets/login.js')
     .addEntry('admin', './assets/admin.js')
     .addEntry('easyadmin-post', './assets/easyadmin-post.js')
+    .addEntry('easyadmin-comment', './assets/easyadmin-comment.js')
     .addEntry('search', './assets/search.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)

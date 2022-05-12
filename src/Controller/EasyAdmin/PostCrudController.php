@@ -5,10 +5,10 @@ namespace App\Controller\EasyAdmin;
 use App\Controller\EasyAdmin\Fields\TranslatedTextField;
 use App\Entity\Post;
 use App\Form\CommentType;
-use App\Form\TagType;
 use App\Security\EasyAdmin\PostVoter;
 use App\Workflow\Actions\PostCancelAction;
 use App\Workflow\Actions\PostPublishAction;
+use App\Workflow\Actions\PostRequestReviewAction;
 use App\Workflow\NonExistentActionForWorkflowActioner;
 use App\Workflow\WorkflowActioner;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -65,6 +65,7 @@ final class PostCrudController extends AbstractCrudController
         // creates new actions (cfr private custom functions below)
         $publishAction = $this->getPublishAction('post_publish');
         $cancelAction = $this->getCancelAction('post_cancel');
+        $requestReviewAction = $this->getRequestReviewAction('post_request_review')->displayAsButton();
 
         return $actions
             // add a new actions specifically on the Index page nowhere else
@@ -77,6 +78,10 @@ final class PostCrudController extends AbstractCrudController
             // remove an existing action from the index page
             ->remove(Crud::PAGE_INDEX, Action::DELETE)
 
+            ->add(Crud::PAGE_DETAIL, $requestReviewAction)
+            ->setPermission('post_request_review', PostVoter::REQUEST_REVIEW)
+            ->add(Crud::PAGE_EDIT, $requestReviewAction)
+            ->setPermission('post_request_review', PostVoter::REQUEST_REVIEW)
             ;
     }
 
@@ -206,6 +211,23 @@ final class PostCrudController extends AbstractCrudController
             ->displayIf(
                 fn($entity) => null !== $entity
                     && $this->workflowActioner->can(PostCancelAction::class, $entity)
+            )
+        ;
+        return $cancelAction;
+    }
+
+    /**
+     * Creates a simple EasyAdmin action referencing it by the name given in parameter
+     */
+    private function getRequestReviewAction(string $name): Action
+    {
+        $cancelAction = Action::new($name);
+        $cancelAction
+            ->linkToCrudAction('postRequestReview')
+            ->setLabel('post.action.to_review')
+            ->displayIf(
+                fn($entity) => null !== $entity
+                    && $this->workflowActioner->can(PostRequestReviewAction::class, $entity)
             )
         ;
         return $cancelAction;

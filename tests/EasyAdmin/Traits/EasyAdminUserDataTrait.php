@@ -94,6 +94,18 @@ trait EasyAdminUserDataTrait
     /**
      * @return Array<string, Array<array-key, User>>
      */
+    public function getOnlyAuthorUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_AUTHOR,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
     public function getEasyAdminAllNonAuthorUsers(): array
     {
         $roles = [

@@ -128,7 +128,7 @@ trait EasyAdminUserDataTrait
             UserRoles::ROLE_PUBLISHER,
         ];
 
-        return $this->getFilteredUsersForTests($roles);
+        return $this->getFilteredUsersForTests($roles, [UserRoles::ROLE_REVIEWER]);
     }
 
     /**
@@ -160,11 +160,11 @@ trait EasyAdminUserDataTrait
      * @param Array<array-key, string> $roles
      * @return Array<string, Array<array-key, User>>
      */
-    private function getFilteredUsersForTests(array $roles): array
+    private function getFilteredUsersForTests(array $roles, array $excludedRoles = []): array
     {
         return array_map(fn($user) => [$user], array_filter(
             $this->getUsersFromUserData(),
-            fn(User $user) => count(array_intersect($roles,$user->getRoles())) > 0
+            fn(User $user) => count(array_intersect($roles,$user->getRoles())) > 0 && count(array_intersect($excludedRoles,$user->getRoles())) === 0
         ));
     }
 

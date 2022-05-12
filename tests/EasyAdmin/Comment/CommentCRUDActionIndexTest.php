@@ -150,7 +150,8 @@ class CommentCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
 
 
             self::assertSelectorNotExists(
-                sprintf('tr[data-id="%d"] .actions .action-comment_cancel', $commentId)
+                sprintf('tr[data-id="%d"] .actions .action-comment_cancel', $commentId),
+                sprintf("There is a Cancel Comment action for the comment %d for user %s", $commentId, $user->getUsername())
             );
         }
     }

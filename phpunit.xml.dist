@@ -26,20 +26,7 @@
         </testsuite>
     </testsuites>
 
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
-        </whitelist>
-    </filter>
-
     <listeners>
         <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
     </listeners>
-
-    <extensions>
-        <!-- it begins a database transaction before every testcase and rolls it back after
-            the test finished, so tests can manipulate the database without affecting other tests -->
-        <!--<extension class="\DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />-->
-        <!-- does not work at the same time as the LiipTestFixturesBundle -->
-    </extensions>
 </phpunit>

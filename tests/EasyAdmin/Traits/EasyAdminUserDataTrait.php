@@ -40,6 +40,19 @@ trait EasyAdminUserDataTrait
     /**
      * @return Array<string, Array<array-key, User>>
      */
+    public function getAllReviewerUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_ADMIN,
+            UserRoles::ROLE_REVIEWER
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
     public function getOnlyReviewerUsers(): array
     {
         $roles = [
@@ -108,6 +121,19 @@ trait EasyAdminUserDataTrait
     /**
      * @return Array<string, Array<array-key, User>>
      */
+    public function getAllEasyAdminGrantedNonReviewerUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_AUTHOR,
+            UserRoles::ROLE_PUBLISHER,
+        ];
+
+        return $this->getFilteredUsersForTests($roles, [UserRoles::ROLE_REVIEWER]);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
     public function getAllNonAdminUsers(): array
     {
         $roles = [
@@ -134,11 +160,11 @@ trait EasyAdminUserDataTrait
      * @param Array<array-key, string> $roles
      * @return Array<string, Array<array-key, User>>
      */
-    private function getFilteredUsersForTests(array $roles): array
+    private function getFilteredUsersForTests(array $roles, array $excludedRoles = []): array
     {
         return array_map(fn($user) => [$user], array_filter(
             $this->getUsersFromUserData(),
-            fn(User $user) => count(array_intersect($roles,$user->getRoles())) > 0
+            fn(User $user) => count(array_intersect($roles,$user->getRoles())) > 0 && count(array_intersect($excludedRoles,$user->getRoles())) === 0
         ));
     }
 

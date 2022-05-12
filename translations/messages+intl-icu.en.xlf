@@ -493,7 +493,7 @@
             </trans-unit>
             <trans-unit id="comment.action.cancel">
                 <source>comment.action.cancel</source>
-                <target>Cancelled</target>
+                <target>Cancel</target>
             </trans-unit>
 
         </body>

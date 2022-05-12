@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Security\EasyAdmin;
 
-use App\Entity\Post;
+use App\Entity\Comment;
 use App\Entity\User;
 use App\Entity\UserRoles;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Security;
 
-class PostVoter extends Voter
+class CommentVoter extends Voter
 {
     public const CREATE = 'easyadmin_create';
     public const SHOW = 'easyadmin_show';
@@ -24,7 +24,7 @@ class PostVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return (($subject instanceof Post
+        return (($subject instanceof Comment
             && \in_array($attribute, [self::SHOW, self::PUBLISH, self::CANCEL], true))
             || \in_array($attribute, [self::CREATE], true)
         );
@@ -42,6 +42,10 @@ class PostVoter extends Voter
             return false;
         }
 
+        if ($this->security->isGranted(UserRoles::ROLE_ADMIN, $user)) {
+            return true;
+        }
+
         return match ($attribute) {
             self::SHOW => $this->voteOnShow(),
             self::PUBLISH => $this->voteOnPublish(),
@@ -53,7 +57,7 @@ class PostVoter extends Voter
 
     protected function voteOnShow(): bool
     {
-        if ($this->security->isGranted(UserRoles::ROLE_AUTHOR) || $this->security->isGranted(UserRoles::ROLE_PUBLISHER)) {
+        if ($this->security->isGranted(UserRoles::ROLE_USER)) {
             return true;
         }
 
@@ -62,7 +66,7 @@ class PostVoter extends Voter
 
     protected function voteOnPublish(): bool
     {
-        if ($this->security->isGranted(UserRoles::ROLE_PUBLISHER)) {
+        if ($this->security->isGranted(UserRoles::ROLE_REVIEWER)) {
             return true;
         }
 
@@ -71,7 +75,7 @@ class PostVoter extends Voter
 
     protected function voteOnCancel(): bool
     {
-        if ($this->security->isGranted(UserRoles::ROLE_PUBLISHER)) {
+        if ($this->security->isGranted(UserRoles::ROLE_REVIEWER)) {
             return true;
         }
 
@@ -80,7 +84,7 @@ class PostVoter extends Voter
 
     protected function voteOnCreate(): bool
     {
-        if ($this->security->isGranted(UserRoles::ROLE_AUTHOR)) {
+        if ($this->security->isGranted(UserRoles::ROLE_USER)) {
             return true;
         }
 

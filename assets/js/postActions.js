@@ -55,3 +55,30 @@ Array.from(cancelActionButtons).forEach(function (button) {
         modal.display()
     })
 })
+
+const requestReviewActionButtons = document.getElementsByClassName('action-post_request_review');
+
+let postReviewRequested = false;
+
+Array.from(requestReviewActionButtons).forEach(function (button) {
+    button.addEventListener('click', function(event) {
+        if (postReviewRequested) {
+            postReviewRequested = false;
+            return;
+        }
+
+        event.preventDefault();
+        const dataRow = getParentFromTagName(event.target, 'tr')
+        const dataTitle = getChildFromDataLabel(dataRow, "Title")
+
+        const postCancel = function(result) {
+            postReviewRequested = result
+            if (result){
+                event.target.click()
+            }
+        }
+
+        const modal = new BootstrapModalConfirmation(dataRow, 'cancel', dataTitle.innerHTML,  postCancel)
+        modal.display()
+    })
+})

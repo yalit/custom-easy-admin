@@ -7,6 +7,7 @@ namespace App\Tests\EasyAdmin\Traits;
 use App\DataFixtures\AppFixtures;
 use App\Entity\User;
 use App\Entity\UserRoles;
+use PHPUnit\Util\Exception;
 
 trait EasyAdminUserDataTrait
 {
@@ -81,10 +82,34 @@ trait EasyAdminUserDataTrait
     /**
      * @return Array<string, Array<array-key, User>>
      */
+    public function getOnlyPublisherUsers(): array
+    {
+        $roles = [
+            UserRoles::ROLE_PUBLISHER,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
     public function getAllAuthorUsers(): array
     {
         $roles = [
             UserRoles::ROLE_ADMIN,
+            UserRoles::ROLE_AUTHOR,
+        ];
+
+        return $this->getFilteredUsersForTests($roles);
+    }
+
+    /**
+     * @return Array<string, Array<array-key, User>>
+     */
+    public function getOnlyAuthorUsers(): array
+    {
+        $roles = [
             UserRoles::ROLE_AUTHOR,
         ];
 
@@ -154,6 +179,15 @@ trait EasyAdminUserDataTrait
             $this->getUsersFromUserData(),
             fn(User $user) => count($user->getRoles()) === 1 && in_array(UserRoles::ROLE_USER, $user->getRoles())
         ));
+    }
+
+    protected function getActualUserFromUser(User $user): User
+    {
+        if (!isset($this->entityManager)) {
+            throw new Exception("Entity Manager not defined");
+        }
+
+        return $this->entityManager->getRepository(User::class)->findOneBy(['username' => $user->getUsername()]);
     }
 
     /**

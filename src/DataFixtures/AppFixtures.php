@@ -169,7 +169,7 @@ class AppFixtures extends Fixture
                 $this->getRandomText(),
                 $this->getPostContent(),
                 // Ensure that the first post is written by Jane Doe to simplify tests
-                $this->getReference(['jane_admin', 'tom_admin'][0 === $i ? 0 : random_int(0, 1)]),
+                $this->getReference(['jane_admin', 'tom_admin', 'lola_author', 'youssef_author'][0 === $i ? 0 : floor($i / 4) % 4]),
                 $this->getRandomTags(),
                 $statuses[$i % count($statuses)]
             ];

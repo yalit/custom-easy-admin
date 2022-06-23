@@ -5,10 +5,11 @@ namespace App\Controller\EasyAdmin;
 use App\Controller\EasyAdmin\Fields\TranslatedTextField;
 use App\Entity\Post;
 use App\Form\CommentType;
-use App\Form\TagType;
 use App\Security\EasyAdmin\PostVoter;
+use App\Workflow\ActionInterface;
 use App\Workflow\Actions\PostCancelAction;
 use App\Workflow\Actions\PostPublishAction;
+use App\Workflow\Actions\PostRequestReviewAction;
 use App\Workflow\NonExistentActionForWorkflowActioner;
 use App\Workflow\WorkflowActioner;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -65,6 +66,7 @@ final class PostCrudController extends AbstractCrudController
         // creates new actions (cfr private custom functions below)
         $publishAction = $this->getPublishAction('post_publish');
         $cancelAction = $this->getCancelAction('post_cancel');
+        $requestReviewAction = $this->getRequestReviewAction('post_request_review');
 
         return $actions
             // add a new actions specifically on the Index page nowhere else
@@ -77,6 +79,12 @@ final class PostCrudController extends AbstractCrudController
             // remove an existing action from the index page
             ->remove(Crud::PAGE_INDEX, Action::DELETE)
 
+            ->add(Crud::PAGE_INDEX, $requestReviewAction)
+            ->setPermission('post_request_review', PostVoter::REQUEST_REVIEW)
+            ->add(Crud::PAGE_DETAIL, $requestReviewAction)
+            ->setPermission('post_request_review', PostVoter::REQUEST_REVIEW)
+            ->add(Crud::PAGE_EDIT, $requestReviewAction)
+            ->setPermission('post_request_review', PostVoter::REQUEST_REVIEW)
             ;
     }
 
@@ -116,34 +124,22 @@ final class PostCrudController extends AbstractCrudController
         ;
     }
 
+/**
+     * Specific action linked to the post_request_review action created below
+     * Any process can be triggered here using DI
+     */
+    public function postRequestReview(AdminContext $adminContext): Response
+    {
+        return $this->genericWorkflowAction($adminContext, PostRequestReviewAction::class, "sent to review");
+    }
+
     /**
      * Specific action linked to the post_publish action created below
      * Any process can be triggered here using DI
      */
     public function postPublish(AdminContext $adminContext): Response
     {
-        /** @var Post $post */
-        // From the AdminContext, you have access to the current instance
-        // Attention getEntity() provides an EntityDto not the actual instance
-        $post = $adminContext->getEntity()->getInstance();
-        try {
-            // from the DI you're able as in any other Symfony controller to trigger specific processes
-            $execution = $this->workflowActioner->execute(PostPublishAction::class, $post);
-        } catch (NonExistentActionForWorkflowActioner $e) {
-            $execution = false;
-        }
-
-        if ($execution) {
-            $messageFlash = sprintf("Post %s has correctly been Published", $post->getTitle());
-        } else {
-            $messageFlash = sprintf("Post %s couldn't be Published", $post->getTitle());
-        }
-
-         // the EasyAdmin CRUD Controllers are extension of the AbstractCRUDController so you can use all the basic
-         // functionalities from it (addFlash, render, redirect ...)
-        $this->addFlash("success", $messageFlash);
-
-        return $this->redirect($adminContext->getReferrer());
+        return $this->genericWorkflowAction($adminContext, PostPublishAction::class, "Published");
     }
 
     /**
@@ -152,21 +148,26 @@ final class PostCrudController extends AbstractCrudController
      */
     public function postCancel(AdminContext $adminContext): Response
     {
+        return $this->genericWorkflowAction($adminContext, PostCancelAction::class, "Cancelled");
+    }
+    
+    private function genericWorkflowAction(AdminContext $adminContext, string $actionClassName, string $message): Response
+    {
         /** @var Post $post */
         $post = $adminContext->getEntity()->getInstance();
         try {
-            $execution = $this->workflowActioner->execute(PostCancelAction::class, $post);
+            $execution = $this->workflowActioner->execute($actionClassName, $post);
         } catch (NonExistentActionForWorkflowActioner $e) {
             $execution = false;
         }
 
         if ($execution) {
-            $messageFlash = sprintf("Post %s has correctly been Cancelled", $post->getTitle());
+            $messageFlash = sprintf("Post %s has correctly been %s", $post->getTitle(), $message);
         } else {
-            $messageFlash = sprintf("Post %s couldn't be Cancelled", $post->getTitle());
+            $messageFlash = sprintf("Post %s couldn't be %s", $post->getTitle(),$message);
         }
 
-        $this->addFlash("success", $messageFlash);
+        $this->addFlash("info", $messageFlash);
 
         return $this->redirect($adminContext->getReferrer());
     }
@@ -206,6 +207,23 @@ final class PostCrudController extends AbstractCrudController
             ->displayIf(
                 fn($entity) => null !== $entity
                     && $this->workflowActioner->can(PostCancelAction::class, $entity)
+            )
+        ;
+        return $cancelAction;
+    }
+
+    /**
+     * Creates a simple EasyAdmin action referencing it by the name given in parameter
+     */
+    private function getRequestReviewAction(string $name): Action
+    {
+        $cancelAction = Action::new($name);
+        $cancelAction
+            ->linkToCrudAction('postRequestReview')
+            ->setLabel('post.action.to_review')
+            ->displayIf(
+                fn($entity) => null !== $entity
+                    && $this->workflowActioner->can(PostRequestReviewAction::class, $entity)
             )
         ;
         return $cancelAction;

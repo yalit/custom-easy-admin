@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Tests\EasyAdmin\Traits\DatabaseReloadTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Facebook\WebDriver\Remote\RemoteWebElement;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Panther\PantherTestCase;
 
@@ -61,5 +62,23 @@ abstract class BaseEasyAdminPantherTestCase extends PantherTestCase implements B
     public function getAdminUrl(string $CRUDControllerClass, string $action, string $entityId = null)
     {
         throw new \Exception("Not compatible with EasyAdmin URL Generator");
+    }
+
+    public function goToNextPage(): void
+    {
+        $crawler = $this->client->getCrawler();
+        $navigationButtons = $crawler->filter('a.page-link .btn-label');
+
+        $clicked = false;
+        /** @var RemoteWebElement $navigationButton */
+        foreach ($navigationButtons as $navigationButton) {
+            $navigationButton->getLocationOnScreenOnceScrolledIntoView();
+            if (!$clicked && $navigationButton->getText() === "Next") {
+                $navigationButton->click();
+                $clicked = true;
+            }
+        }
+
+        $this->client->refreshCrawler();
     }
 }

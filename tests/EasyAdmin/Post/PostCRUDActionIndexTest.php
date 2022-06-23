@@ -191,6 +191,7 @@ class PostCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
         $this->loginUser($user);
 
         $this->goToPostIndex();
+        $this->goToNextPage();
 
         $user = $this->getActualUserFromUser($user);
 
@@ -202,11 +203,7 @@ class PostCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
             $id = $row->findElement(WebDriverBy::cssSelector('td[data-label="ID"]'))->getText();
             if ($status === "Draft") {
                 $post = $this->entityManager->getRepository(Post::class)->findOneBy(['id' => $id, 'author' => $user]);
-                if ($post === null) {
-                    self::assertSelectorNotExists(
-                        sprintf('tr[data-id="%s"] .actions .action-post_request_review', $id)
-                    );
-                } else {
+                if ($post !== null) {
                     self::assertSelectorExists(
                         sprintf('tr[data-id="%s"] .actions .action-post_request_review', $id)
                     );
@@ -251,6 +248,7 @@ class PostCRUDActionIndexTest extends BaseEasyAdminPantherTestCase
         $user = $this->getActualUserFromUser($user);
 
         $this->goToPostIndex();
+        $this->goToNextPage();
 
         $rows = $this->client->getCrawler()->filter('tbody tr');
 

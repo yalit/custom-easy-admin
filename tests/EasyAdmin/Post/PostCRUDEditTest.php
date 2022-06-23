@@ -91,7 +91,7 @@ class PostCRUDEditTest extends BaseEasyAdminWebTestCase
 
         $this->getAdminUrl(PostCrudController::class, Action::EDIT, (string)$post->getId());
 
-        self::assertSelectorExists("button.action-post_request_review");
+        self::assertSelectorExists("a.action-post_request_review");
     }
 
     /**
@@ -105,7 +105,7 @@ class PostCRUDEditTest extends BaseEasyAdminWebTestCase
 
         $this->getAdminUrl(PostCrudController::class, Action::EDIT, (string)$post->getId());
 
-        self::assertSelectorExists("button.action-post_request_review");
+        self::assertSelectorExists("a.action-post_request_review");
     }
 
     /**
@@ -119,6 +119,6 @@ class PostCRUDEditTest extends BaseEasyAdminWebTestCase
 
         $this->getAdminUrl(PostCrudController::class, Action::EDIT, (string)$post->getId());
 
-        self::assertSelectorNotExists("button.action-post_request_review");
+        self::assertSelectorNotExists("a.action-post_request_review");
     }
 }

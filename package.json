@@ -1,5 +1,6 @@
 {
     "devDependencies": {
+        "@babel/plugin-proposal-class-properties": "^7.18.6",
         "@fortawesome/fontawesome-free": "^5.15.4",
         "@symfony/stimulus-bridge": "^2.1.0",
         "@symfony/webpack-encore": "^1.8.2",

@@ -3,16 +3,16 @@ about:
 
 install:
 	composer install
-	yarn install
+	npm install
 
 build:
-	yarn encore prod
+	npm run prod
 
 build-dev:
-	yarn encore dev
+	npm run dev
 
 build-dev-watch:
-	yarn encore dev --watch
+	npm run dev --watch
 
 db-init-dev:
 	bin/console d:s:d --env=dev --force

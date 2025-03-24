@@ -3,16 +3,9 @@ about:
 
 install:
 	composer install
-	npm install
 
 build:
-	npm run prod
-
-build-dev:
-	npm run dev
-
-build-dev-watch:
-	npm run dev --watch
+	bin/console asset-map:compile
 
 db-init-dev:
 	bin/console d:s:d --env=dev --force

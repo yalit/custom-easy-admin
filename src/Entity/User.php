@@ -2,13 +2,16 @@
 
 namespace App\Entity;
 
+use App\Entity\Enums\UserRoles;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -26,6 +29,8 @@ class User
 
     #[ORM\Column(length: 255)]
     private ?string $password = null;
+
+    private ?string $plainPassword = null;
 
     #[ORM\Column]
     private array $roles = [];
@@ -108,6 +113,10 @@ class User
 
     public function getRoles(): array
     {
+        if (!in_array(UserRoles::AUTHOR->value, $this->roles, true)) {
+            $this->roles[] = UserRoles::AUTHOR->value;
+        }
+
         return $this->roles;
     }
 
@@ -176,5 +185,25 @@ class User
         }
 
         return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        $this->plainPassword = null;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): void
+    {
+        $this->plainPassword = $plainPassword;
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Factory;
 
+use App\Entity\Enums\UserRoles;
 use App\Entity\User;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 
 /**
@@ -10,14 +12,7 @@ use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
  */
 final class UserFactory extends PersistentProxyObjectFactory
 {
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
-     *
-     * @todo inject services if required
-     */
-    public function __construct()
-    {
-    }
+    public const PASSWORD = "Password123)";
 
     public static function class(): string
     {
@@ -26,8 +21,6 @@ final class UserFactory extends PersistentProxyObjectFactory
 
     /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
-     *
-     * @todo add your default values here
      */
     protected function defaults(): array|callable
     {
@@ -35,18 +28,41 @@ final class UserFactory extends PersistentProxyObjectFactory
             'fullName' => self::faker()->name(),
             'email' => self::faker()->email(),
             'username' => self::faker()->userName(),
-            'password' => self::faker()->password(),
-            'roles' => ['ROLE_USER'],
+            'plainPassword' => UserFactory::PASSWORD,
+            'roles' => [],
         ];
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-     */
-    protected function initialize(): static
+    public static function admin(): array|callable
     {
-        return $this
-            // ->afterInstantiate(function(User $user): void {})
-        ;
+        return [
+            'fullName' => "Administrator",
+            'email' => "admin@email.com",
+            'username' => "Admin",
+            'plainPassword' => UserFactory::PASSWORD,
+            'roles' => [UserRoles::ADMIN->value],
+        ];
+    }
+
+    public static function publisher(int $n): array|callable
+    {
+        return [
+            'fullName' => sprintf("Publisher %d", $n),
+            'email' => sprintf("publisher_%d@email.com", $n),
+            'username' => sprintf("publisher_%d", $n),
+            'plainPassword' => UserFactory::PASSWORD,
+            'roles' => [UserRoles::PUBLISHER->value],
+        ];
+    }
+
+    public static function author(int $n): array|callable
+    {
+        return [
+            'fullName' => sprintf("Author %d", $n),
+            'email' => sprintf("author_%d@email.com", $n),
+            'username' => sprintf("author_%d", $n),
+            'plainPassword' => UserFactory::PASSWORD,
+            'roles' => [],
+        ];
     }
 }

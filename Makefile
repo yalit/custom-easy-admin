@@ -1,3 +1,5 @@
+.PHONY:tests
+
 about:
 	bin/console about
 
@@ -13,8 +15,20 @@ db-init-dev:
 	bin/console d:s:c --env=dev
 	bin/console d:s:u --force --env=dev
 
+db-init-test:
+	bin/console d:s:d --env=test --force
+	bin/console d:d:c --env=test
+	bin/console d:s:c --env=test
+	bin/console d:s:u --force --env=test
+
 db-fixtures: db-init-dev
 	bin/console app:fixtures
+
+db-fixtures-test: db-init-test
+	bin/console app:fixtures --env=test
+
+tests:
+	./vendor/bin/phpunit --testdox
 
 lint-yaml:
 	./bin/console lint:yaml config --parse-tags

@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Controller\Admin\Field\EnumField;
 use App\Entity\Comment;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -12,7 +13,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Fields\TranslatedTextField;
 use Symfony\Component\HttpFoundation\Response;
 use Voter\CommentVoter;
 use Workflow\Actions\CommentCancelAction;
@@ -55,7 +55,7 @@ class CommentCrudController extends AbstractCrudController
         yield TextEditorField::new('content')->setNumOfRows(10)->hideOnIndex();
         yield AssociationField::new('author');
         yield AssociationField::new('post')->autocomplete();
-        yield TranslatedTextField::new('status');
+        yield EnumField::new('status');
     }
 
     #[\Override]

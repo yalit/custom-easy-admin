@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Entity\Enums\UserRoles;
+use App\Entity\Enums\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -111,12 +111,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, $this->getRoles());
+    }
+
     public function getRoles(): array
     {
-        if (!in_array(UserRoles::AUTHOR->value, $this->roles, true)) {
-            $this->roles[] = UserRoles::AUTHOR->value;
-        }
-
         return $this->roles;
     }
 

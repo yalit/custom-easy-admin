@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Controller\Admin\Field\EnumField;
 use App\Entity\Post;
 use App\Form\CommentType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -17,7 +18,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Fields\TranslatedTextField;
 use Symfony\Component\HttpFoundation\Response;
 use Voter\PostVoter;
 use Workflow\Actions\PostCancelAction;
@@ -113,7 +113,7 @@ final class PostCrudController extends AbstractCrudController
         yield AssociationField::new('author')->hideOnForm();
         yield AssociationField::new('comments')->onlyOnIndex();
         // Set up a custom field for the display of the status on the index
-        yield TranslatedTextField::new('status')->hideOnForm();
+        yield EnumField::new('status')->hideOnForm();
         yield DateTimeField::new('statusDate', 'Status Date')
             ->setFormat(self::STATUS_DATE_FORMAT)
             ->hideOnForm()

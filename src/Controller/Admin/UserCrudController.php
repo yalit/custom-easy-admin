@@ -2,7 +2,7 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Enums\UserRoles;
+use App\Entity\Enums\UserRole;
 use App\Entity\User;
 use App\Voter\Admin\UserVoter;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -30,11 +30,11 @@ class UserCrudController extends AbstractCrudController
             // Set the permission for more than 1 actions at one time ==> overwrites all the existing permissions
             ->setPermissions([
                 Action::EDIT => UserVoter::EDIT, // Use of a standard Symfony Voter
-                Action::DELETE => UserRoles::ADMIN->value // Use of a global Symfony Role
+                Action::DELETE => UserRole::ADMIN->value // Use of a global Symfony Role
             ])
             //Setting the permission uniquely for one single action
             //(can't be used before the setPermissions as setPermissions - above - overwrites everything)
-            ->setPermission(Action::NEW, UserRoles::ADMIN->value)
+            ->setPermission(Action::NEW, UserVoter::CREATE)
         ;
 
         return $actions;
@@ -48,7 +48,7 @@ class UserCrudController extends AbstractCrudController
         yield EmailField::new('email');
         yield ChoiceField::new('roles')
             ->allowMultipleChoices()
-            ->setChoices(UserRoles::all())
+            ->setChoices(UserRole::all())
             ->setRequired(false)
         ;
     }

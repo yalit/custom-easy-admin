@@ -29,6 +29,11 @@ class Tag
         $this->posts = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->name ?? 'noname';
+    }
+
     public function getId(): ?int
     {
         return $this->id;

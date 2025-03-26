@@ -13,15 +13,11 @@ final class InitialStateStory extends Story
     public function build(): void
     {
         TagFactory::createMany(10);
-        UserFactory::createOne(UserFactory::admin());
-        UserFactory::createMany(5, [UserFactory::class, 'publisher']);
-        UserFactory::createMany(5, [UserFactory::class, 'author']);
-        PostFactory::createMany(50, static function () {
-            return [
-                'tags' => TagFactory::randomRange(1, 5),
-                'author' => UserFactory::random(),
-            ];
-        });
-        CommentFactory::createMany(200);
+        UserFactory::admin();
+        UserFactory::publisher();
+        UserFactory::author();
+        PostFactory::draft(5);
+        PostFactory::inReview(5);
+        PostFactory::published(5);
     }
 }

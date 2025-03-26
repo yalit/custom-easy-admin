@@ -8,49 +8,39 @@ use App\Controller\Admin\DashboardController;
 use App\Controller\Admin\UserCrudController;
 use App\Entity\User;
 use App\Tests\Functional\EasyAdmin\AbstractAppCrudTestCase;
-use App\Tests\Functional\Story\TestLoginStory;
+use App\Tests\Functional\Story\FunctionalTestStory;
+use App\Tests\Functional\Story\InitialTestStateStory;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Test\Trait\CrudTestIndexAsserts;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Zenstruck\Foundry\Attribute\WithStory;
 
+#[WithStory(InitialTestStateStory::class)]
 class UserListingTest extends AbstractAppCrudTestCase
 {
     use CrudTestIndexAsserts;
 
-    public static function allUserEmails(): array
+    public static function allUsers(): array
     {
-        return [
-            'admin' => ['admin@email.com'],
-            'publisher' => ['publisher_1@email.com'],
-            'author' => ['author_1@email.com'],
-        ];
+        return FunctionalTestStory::oneUserOfEach();
     }
 
-    public static function nonAdminUserEmails(): array
+    public static function nonAdminUsers(): array
     {
-        return [
-            'publisher' => ['publisher_1@email.com'],
-            'author' => ['author_1@email.com'],
-        ];
+        return FunctionalTestStory::noAdminUsers();
     }
 
-    protected function setUp(): void
+    #[DataProvider('allUsers')]
+    public function testUserIndexDisplays(User $user): void
     {
-        parent::setUp();
-        TestLoginStory::load();
-    }
-
-    #[DataProvider('allUserEmails')]
-    public function testUserIndexDisplays(string $email): void
-    {
-        $this->login($email);
+        $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
         $this->assertResponseIsSuccessful();
     }
 
     public function testUserListingData(): void
     {
-        $this->login('admin@email.com');
+        $this->login();
         $this->client->request("GET", $this->generateIndexUrl());
 
         $this->assertIndexColumnExists('fullName');
@@ -61,7 +51,7 @@ class UserListingTest extends AbstractAppCrudTestCase
 
     public function testGenericUserActionsDisplaysForAdmin(): void
     {
-        $this->login('admin@email.com');
+        $this->login();
         $this->client->request("GET", $this->generateIndexUrl());
 
         $users = $this->entityManager->getRepository(User::class)->findAll();
@@ -75,10 +65,10 @@ class UserListingTest extends AbstractAppCrudTestCase
         $this->assertIndexEntityActionExists(Action::DELETE, $user->getId());
     }
 
-    #[DataProvider('nonAdminUserEmails')]
-    public function testGenericUserActionsDisplaysForNonAdmin(string $userEmail): void
+    #[DataProvider('nonAdminUsers')]
+    public function testGenericUserActionsDisplaysForNonAdmin(User $user): void
     {
-        $this->login($userEmail);
+        $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
 
         $users = $this->entityManager->getRepository(User::class)->findAll();
@@ -95,10 +85,5 @@ class UserListingTest extends AbstractAppCrudTestCase
     protected function getControllerFqcn(): string
     {
         return UserCrudController::class;
-    }
-
-    protected function getDashboardFqcn(): string
-    {
-        return DashboardController::class;
     }
 }

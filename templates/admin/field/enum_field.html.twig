@@ -1,0 +1,11 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+
+{% if field.formattedValue %}
+    {% if ea.crud.currentAction == 'detail' %}
+        <span title="{{ field.value.value }}">{{ field.formattedValue.value|raw|trans|nl2br }}</span>
+    {% else %}
+        <span title="{{ field.value.value }}">{{ field.formattedValue.value|raw|trans}}</span>
+    {% endif %}
+{% endif %}

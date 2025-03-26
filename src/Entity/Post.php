@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use App\Entity\Enums\PostStatus;
+use App\Entity\Factory\PostStatusChangeFactory;
 use App\Repository\PostRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -28,8 +31,12 @@ class Post
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $publishedAt = null;
+    /**
+     * @var Collection<int, PostStatusChange>
+     */
+    #[ORM\OneToMany(targetEntity: PostStatusChange::class, mappedBy: 'post', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['time' => 'DESC'])]
+    private Collection $statusChanges;
 
     #[ORM\ManyToOne(inversedBy: 'posts')]
     #[ORM\JoinColumn(nullable: false)]
@@ -47,10 +54,24 @@ class Post
     #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'posts')]
     private Collection $tags;
 
+    #[ORM\Column(type: Types::STRING, enumType: PostStatus::class)]
+    private PostStatus $status = PostStatus::DRAFT;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
         $this->tags = new ArrayCollection();
+        $this->statusChanges = new ArrayCollection();
+    }
+
+    public function getStatusDate(): DateTimeImmutable
+    {
+        return $this->statusChanges->first()->getTime();
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->statusChanges->last()->getTime();
     }
 
     public function getId(): ?int
@@ -183,4 +204,45 @@ class Post
 
         return $this;
     }
+
+    public function getStatus(): PostStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(PostStatus $status): void
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return Collection<int, PostStatusChange>
+     */
+    public function getStatusChanges(): Collection
+    {
+        return $this->statusChanges;
+    }
+
+    public function addStatusChange(PostStatusChange $statusChange): static
+    {
+        if (!$this->statusChanges->contains($statusChange)) {
+            $this->statusChanges->add($statusChange);
+            $statusChange->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStatusChange(PostStatusChange $statusChange): static
+    {
+        if ($this->statusChanges->removeElement($statusChange)) {
+            // set the owning side to null (unless already changed)
+            if ($statusChange->getPost() === $this) {
+                $statusChange->setPost(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

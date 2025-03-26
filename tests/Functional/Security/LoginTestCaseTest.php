@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Security;
 
+use App\Entity\User;
 use App\Factory\UserFactory;
 use App\Tests\AbstractAppWebTestCase;
-use App\Tests\Functional\Story\TestLoginStory;
+use App\Tests\Functional\Story\FunctionalTestStory;
+use App\Tests\Functional\Story\InitialTestStateStory;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Zenstruck\Foundry\Attribute\WithStory;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
+#[WithStory(InitialTestStateStory::class)]
 class LoginTestCaseTest extends AbstractAppWebTestCase
 {
     use ResetDatabase, Factories;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        TestLoginStory::load();
-    }
 
     public function testLoginAccessIsPublic(): void
     {
@@ -30,12 +28,12 @@ class LoginTestCaseTest extends AbstractAppWebTestCase
     }
 
     #[DataProvider('loginUserEmails')]
-    public function testLoginForUser(string $userEmail): void
+    public function testLoginForUser(User $user): void
     {
         $this->client->request('GET', '/login');
 
         $this->client->submitForm('login_submit', [
-            'email' => $userEmail,
+            'email' => $user->getEmail(),
             'password' => UserFactory::PASSWORD,
         ]);
 
@@ -49,10 +47,6 @@ class LoginTestCaseTest extends AbstractAppWebTestCase
 
     public static function loginUserEmails(): array
     {
-        return [
-            'admin' => ['admin@email.com'],
-            'publisher' => ['publisher_1@email.com'],
-            'author' => ['author_1@email.com'],
-        ];
+        return FunctionalTestStory::oneUserOfEach();
     }
 }

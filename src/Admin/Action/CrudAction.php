@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Admin\Action;
+namespace App\Admin\Action;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 

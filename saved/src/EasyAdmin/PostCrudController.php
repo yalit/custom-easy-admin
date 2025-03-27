@@ -1,7 +1,7 @@
 <?php
 
 
-use App\Controller\Admin\Field\EnumField;
+use App\Admin\Field\EnumField;
 use App\Entity\Post;
 use App\Form\CommentType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;

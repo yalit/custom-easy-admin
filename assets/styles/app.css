@@ -22,7 +22,7 @@ main {
         .form-content {
             display: flex;
             flex-direction: column;
-            min-width: 40vw;
+            width: 250px;
             gap: 10px;
 
             label {display: none;}

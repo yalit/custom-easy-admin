@@ -2,7 +2,7 @@
 
 namespace App\Tests\Functional\EasyAdmin\Post;
 
-use App\Controller\Admin\PostCrudController;
+use App\Controller\Admin\Post\PostCrudController;
 use App\Entity\Enums\PostStatus;
 use App\Entity\Post;
 use App\Entity\User;

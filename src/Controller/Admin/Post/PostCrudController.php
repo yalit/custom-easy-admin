@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Controller\Admin\Post;
 
-use App\Controller\Admin\Action\RequestReviewAction;
-use App\Controller\Admin\Field\EnumField;
+use App\Admin\Action\Post\PostRequestReviewAction;
+use App\Admin\Field\EnumField;
 use App\Entity\Enums\PostStatus;
 use App\Entity\Post;
 use App\Voter\PostVoter;
@@ -30,8 +30,7 @@ class PostCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return parent::configureCrud($crud)
-            ->setEntityPermission(PostVoter::VIEW)
-        ;
+            ->setEntityPermission(PostVoter::VIEW);
     }
 
     public function configureActions(Actions $actions): Actions
@@ -41,9 +40,10 @@ class PostCrudController extends AbstractCrudController
             ->setPermission(Action::NEW, PostVoter::CREATE)
             ->setPermission(Action::EDIT, PostVoter::EDIT)
             ->setPermission(Action::DELETE, PostVoter::DELETE)
-            ->add(Crud::PAGE_INDEX, RequestReviewAction::create())
-            ->setPermission(RequestReviewAction::NAME, PostVoter::REQUEST_REVIEW)
-            ;
+            ->add(Crud::PAGE_INDEX, PostRequestReviewAction::create())
+            ->add(Crud::PAGE_DETAIL, PostRequestReviewAction::create())
+            ->add(Crud::PAGE_EDIT, PostRequestReviewAction::create())
+            ->setPermission(PostRequestReviewAction::NAME, PostVoter::REQUEST_REVIEW);
     }
 
     public function configureFields(string $pageName): iterable

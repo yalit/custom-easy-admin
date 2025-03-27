@@ -40,6 +40,38 @@ final class PostFactory extends PersistentProxyObjectFactory
         ];
     }
 
+    /**
+     * @param Proxy<User> $author
+     * @return Proxy<Post>
+     */
+    public static function anyOwned(Proxy $author, PostStatus $status): Proxy
+    {
+        $allPosts = PostFactory::all();
+
+        $posts = array_values(array_filter($allPosts, fn (/** @param Proxy<Post> $p */Proxy $p) => $p->getAuthor()->getId() === $author->getId() && $p->getStatus() === $status));
+        if (count($posts) === 0){
+            throw new Exception("Post not found");
+        }
+
+        return $posts[0];
+    }
+
+    /**
+     * @param Proxy<User> $author
+     * @return Proxy<Post>
+     */
+    public static function anyNotOwned(Proxy $author, PostStatus $status): Proxy
+    {
+        $allPosts = PostFactory::all();
+
+        $post = array_values(array_filter($allPosts, fn (/** @param Proxy<Post> $p */Proxy $p) => $p->getAuthor()->getId() !== $author->getId() && $p->getStatus() === $status));
+        if (count($post) === 0){
+            throw new Exception("Post not found");
+        }
+
+        return $post[0];
+    }
+
     public static function draft(int $nb = 10, UserRole $role = UserRole::AUTHOR): void
     {
         for ($i = 0; $i < $nb; $i++) {

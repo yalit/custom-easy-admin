@@ -72,6 +72,42 @@ class PostListingTest extends AbstractAppCrudTestCase
         }
     }
 
+    public static function detailActionUsersVisibilityProvider(): iterable
+    {
+        yield "Author draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT];
+        yield "Publisher draft" => [UserFactory::anyPublisher(), PostStatus::DRAFT];
+        yield "Admin draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT];
+        yield "Author in_review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW];
+        yield "Publisher in_review" => [UserFactory::anyPublisher(), PostStatus::IN_REVIEW];
+        yield "Admin in_review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW];
+        yield "Author published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED];
+        yield "Publisher published" => [UserFactory::anyPublisher(), PostStatus::PUBLISHED];
+        yield "Admin published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED];
+        yield "Author archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED];
+        yield "Publisher archived" => [UserFactory::anyPublisher(), PostStatus::ARCHIVED];
+        yield "Admin archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED];
+        yield "Author rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED];
+        yield "Publisher rejected" => [UserFactory::anyPublisher(), PostStatus::REJECTED];
+        yield "Admin rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED];
+    }
+
+    #[DataProvider('detailActionUsersVisibilityProvider')]
+    public function testDetailActionVisibility(User $user, PostStatus $status): void
+    {
+        $this->login($user->getEmail());
+        $this->client->request("GET", $this->generateIndexUrl());
+        self::assertResponseIsSuccessful();
+
+        $ownPost = $this->getOwnPost($user, $status);
+        if ($ownPost) {
+            $this->assertIndexEntityActionExists(Action::DETAIL, $ownPost->getId());
+        }
+
+        $notOwnPost = $this->getNotOwnPost($user, $status);
+        $this->assertIndexEntityActionExists(Action::DETAIL, $notOwnPost->getId());
+    }
+
+
     public static function editPostVisibilityProvider(): iterable
     {
         yield "Author own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, 'own', true];

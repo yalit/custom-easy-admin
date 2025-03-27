@@ -37,6 +37,7 @@ class PostCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         return parent::configureActions($actions)
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->setPermission(Action::NEW, PostVoter::CREATE)
             ->setPermission(Action::EDIT, PostVoter::EDIT)
             ->setPermission(Action::DELETE, PostVoter::DELETE)

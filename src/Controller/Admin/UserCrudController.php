@@ -4,7 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Enums\UserRole;
 use App\Entity\User;
-use App\Voter\Admin\UserVoter;
+use App\Voter\UserVoter;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;

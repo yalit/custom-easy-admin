@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Factory;
+namespace App\Story\Factory;
 
 use App\Entity\Enums\UserRole;
 use App\Entity\User;
@@ -45,7 +45,7 @@ final class UserFactory extends PersistentProxyObjectFactory
     }
 
     /**
-     * @return Proxy<User>[]
+     * @return Proxy
      */
     public static function publisher(string $name = "Publisher", int $nb = 5): array
     {
@@ -61,7 +61,7 @@ final class UserFactory extends PersistentProxyObjectFactory
     }
 
     /**
-     * @return Proxy<User>[]
+     * @return Proxy
      */
     public static function author(string $name = "Author", int $nb = 5): array
     {

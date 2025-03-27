@@ -2,7 +2,7 @@
 
 namespace App\Tests;
 
-use App\Factory\UserFactory;
+use App\Story\Factory\UserFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Functional\Security;
 
 use App\Entity\User;
-use App\Factory\UserFactory;
+use App\Story\Factory\UserFactory;
 use App\Tests\AbstractAppWebTestCase;
-use App\Tests\Functional\Story\FunctionalTestStory;
-use App\Tests\Functional\Story\InitialTestStateStory;
+use App\Tests\Story\FunctionalTestStory;
+use App\Tests\Story\InitialTestStateStory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Zenstruck\Foundry\Attribute\WithStory;
 use Zenstruck\Foundry\Test\Factories;

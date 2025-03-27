@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Factory;
+namespace App\Story\Factory;
 
 use App\Entity\Tag;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;

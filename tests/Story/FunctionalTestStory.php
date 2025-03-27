@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Tests\Functional\Story;
+namespace App\Tests\Story;
 
-use App\Factory\UserFactory;
+use App\Story\Factory\UserFactory;
 
 class FunctionalTestStory
 {

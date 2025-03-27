@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Voter\Admin;
+namespace App\Voter;
 
 use App\Entity\Enums\UserRole;
 use App\Entity\User;

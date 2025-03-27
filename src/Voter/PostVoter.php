@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Voter\Admin;
+namespace App\Voter;
 
+use App\Entity\Enums\PostStatus;
 use App\Entity\Enums\UserRole;
 use App\Entity\Post;
 use App\Entity\User;
@@ -15,6 +16,7 @@ class PostVoter extends Voter
     public const string CREATE = 'post_create';
     public const string EDIT =  'post_edit';
     public const string DELETE = 'post_delete';
+    public const string REQUEST_REVIEW = 'post_request_review';
 
     public function __construct(private readonly Security $security)
     {
@@ -22,7 +24,7 @@ class PostVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return (in_array($attribute, [self::VIEW, self::EDIT, self::DELETE], true)
+        return (in_array($attribute, [self::VIEW, self::EDIT, self::DELETE, self::REQUEST_REVIEW], true)
             && $subject instanceof Post) || $attribute === self::CREATE;
     }
 
@@ -38,31 +40,49 @@ class PostVoter extends Voter
             return false;
         }
 
-        if ($this->security->isGranted(UserRole::ADMIN->value, $user)) {
-            return true;
-        }
-
         return match ($attribute) {
             self::VIEW => $this->voteOnShow($user),
             self::CREATE => $this->voteOnCreate($user),
             self::EDIT, self::DELETE => $this->voteOnEdit($user, $subject),
+            self::REQUEST_REVIEW => $this->voteOnRequestReview($user, $subject),
             default => false,
         };
     }
 
     protected function voteOnShow(User $user): bool
     {
+        if ($this->security->isGranted(UserRole::ADMIN->value, $user)) {
+            return true;
+        }
+
         return $this->security->isGranted(UserRole::AUTHOR->value, $user)
             || $this->security->isGranted(UserRole::PUBLISHER->value, $user);
     }
 
     protected function voteOnCreate(User $user): bool
     {
+        if ($this->security->isGranted(UserRole::ADMIN->value, $user)) {
+            return true;
+        }
+
         return $this->security->isGranted(UserRole::AUTHOR->value, $user);
     }
 
     protected function voteOnEdit(User $user, Post $post): bool
     {
-        return $post->getAuthor()->getId() === $user->getId();
+        if ($post->getStatus() !== PostStatus::DRAFT) {
+            return false;
+        }
+
+        return $post->getAuthor()->getId() === $user->getId() || $this->security->isGranted(UserRole::ADMIN->value, $user);
+    }
+
+    protected function voteOnRequestReview(User $user, Post $post): bool
+    {
+        if ($post->getStatus() !== PostStatus::DRAFT) {
+            return false;
+        }
+
+        return $post->getAuthor()->getId() === $user->getId() || $this->security->isGranted(UserRole::ADMIN->value, $user);
     }
 }

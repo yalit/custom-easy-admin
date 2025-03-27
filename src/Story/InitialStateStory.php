@@ -2,10 +2,9 @@
 
 namespace App\Story;
 
-use App\Factory\CommentFactory;
-use App\Factory\PostFactory;
-use App\Factory\TagFactory;
-use App\Factory\UserFactory;
+use App\Story\Factory\PostFactory;
+use App\Story\Factory\TagFactory;
+use App\Story\Factory\UserFactory;
 use Zenstruck\Foundry\Story;
 
 final class InitialStateStory extends Story
@@ -19,5 +18,7 @@ final class InitialStateStory extends Story
         PostFactory::draft(5);
         PostFactory::inReview(5);
         PostFactory::published(5);
+        PostFactory::archived(5);
+        PostFactory::rejected(5);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Factory;
+namespace App\Story\Factory;
 
 use App\Entity\Comment;
 use App\Entity\Post;

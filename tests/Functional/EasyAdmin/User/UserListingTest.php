@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\EasyAdmin\User;
 
-use App\Controller\Admin\DashboardController;
 use App\Controller\Admin\UserCrudController;
 use App\Entity\User;
 use App\Tests\Functional\EasyAdmin\AbstractAppCrudTestCase;
-use App\Tests\Functional\Story\FunctionalTestStory;
-use App\Tests\Functional\Story\InitialTestStateStory;
+use App\Tests\Story\FunctionalTestStory;
+use App\Tests\Story\InitialTestStateStory;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Test\Trait\CrudTestIndexAsserts;
 use PHPUnit\Framework\Attributes\DataProvider;

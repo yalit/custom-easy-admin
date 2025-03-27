@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Factory;
+namespace App\Story\Factory;
 
 use App\Entity\Enums\PostStatus;
 use App\Entity\Enums\UserRole;
@@ -85,6 +85,38 @@ final class PostFactory extends PersistentProxyObjectFactory
         }
     }
 
+    public static function archived(int $nb = 10, UserRole $role = UserRole::AUTHOR): void
+    {
+        for ($i = 0; $i < $nb; $i++) {
+            $author = PostFactory::getAuthor($role);
+            $publisher = UserFactory::anyPublisher();
+
+            $post = PostFactory::new()
+                ->asArchived()
+                ->by($author)
+                ->with(['statusChanges' => PostStatusChangeFactory::inArchivedHistory($author, $publisher)])
+                ->create();
+
+            PostFactory::addCommentToPost($post);
+        }
+    }
+
+    public static function rejected(int $nb = 10, UserRole $role = UserRole::AUTHOR): void
+    {
+        for ($i = 0; $i < $nb; $i++) {
+            $author = PostFactory::getAuthor($role);
+            $publisher = UserFactory::anyPublisher();
+
+            $post = PostFactory::new()
+                ->asRejected()
+                ->by($author)
+                ->with(['statusChanges' => PostStatusChangeFactory::inRejectedHistory($author, $publisher)])
+                ->create();
+
+            PostFactory::addCommentToPost($post);
+        }
+    }
+
     public function by(Proxy $author): self
     {
         return $this->with(['author' => $author]);
@@ -109,6 +141,20 @@ final class PostFactory extends PersistentProxyObjectFactory
     {
         return $this->with([
             'status' => PostStatus::PUBLISHED,
+        ]);
+    }
+
+    public function asArchived(): self
+    {
+        return $this->with([
+            'status' => PostStatus::ARCHIVED,
+        ]);
+    }
+
+    public function asRejected(): self
+    {
+        return $this->with([
+            'status' => PostStatus::REJECTED,
         ]);
     }
 

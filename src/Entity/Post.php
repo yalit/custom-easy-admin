@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Entity\Enums\PostStatus;
-use App\Entity\Factory\PostStatusChangeFactory;
 use App\Repository\PostRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -35,7 +34,6 @@ class Post
      * @var Collection<int, PostStatusChange>
      */
     #[ORM\OneToMany(targetEntity: PostStatusChange::class, mappedBy: 'post', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['time' => 'DESC'])]
     private Collection $statusChanges;
 
     #[ORM\ManyToOne(inversedBy: 'posts')]
@@ -72,6 +70,11 @@ class Post
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->statusChanges->last()->getTime();
+    }
+
+    public function getLatestStatusChange(): PostStatusChange
+    {
+        return $this->statusChanges->first();
     }
 
     public function getId(): ?int
@@ -220,7 +223,10 @@ class Post
      */
     public function getStatusChanges(): Collection
     {
-        return $this->statusChanges;
+        $statusChangesArray = $this->statusChanges->toArray();
+        uasort($statusChangesArray, fn (PostStatusChange $a, PostStatusChange $b) => $b->getTime()->getTimestamp() - $a->getTime()->getTimestamp());
+
+        return new ArrayCollection($statusChangesArray);
     }
 
     public function addStatusChange(PostStatusChange $statusChange): static

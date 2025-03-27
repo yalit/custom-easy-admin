@@ -2,10 +2,11 @@
 
 namespace App\Controller\Admin;
 
+use App\Controller\Admin\Action\RequestReviewAction;
 use App\Controller\Admin\Field\EnumField;
 use App\Entity\Enums\PostStatus;
 use App\Entity\Post;
-use App\Voter\Admin\PostVoter;
+use App\Voter\PostVoter;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -19,7 +20,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class PostCrudController extends AbstractCrudController
 {
-    public const STATUS_DATE_FORMAT = 'MMM dd, y HH:mm a';
+    public const string STATUS_DATE_FORMAT = 'MMM dd, y HH:mm a';
 
     public static function getEntityFqcn(): string
     {
@@ -39,6 +40,8 @@ class PostCrudController extends AbstractCrudController
             ->setPermission(Action::NEW, PostVoter::CREATE)
             ->setPermission(Action::EDIT, PostVoter::EDIT)
             ->setPermission(Action::DELETE, PostVoter::DELETE)
+            ->add(Crud::PAGE_INDEX, RequestReviewAction::create())
+            ->setPermission(RequestReviewAction::NAME, PostVoter::REQUEST_REVIEW)
             ;
     }
 

@@ -3,6 +3,7 @@
 namespace App\Controller\Admin\Post;
 
 use App\Admin\Action\Post\PostRequestReviewAction;
+use App\Admin\Action\Post\PublishPostAction;
 use App\Admin\Field\EnumField;
 use App\Entity\Enums\PostStatus;
 use App\Entity\Post;
@@ -43,7 +44,11 @@ class PostCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, PostRequestReviewAction::create())
             ->add(Crud::PAGE_DETAIL, PostRequestReviewAction::create())
             ->add(Crud::PAGE_EDIT, PostRequestReviewAction::create())
-            ->setPermission(PostRequestReviewAction::NAME, PostVoter::REQUEST_REVIEW);
+            ->setPermission(PostRequestReviewAction::NAME, PostVoter::REQUEST_REVIEW)
+            ->add(Crud::PAGE_INDEX, PublishPostAction::create())
+            ->add(Crud::PAGE_DETAIL, PublishPostAction::create())
+            ->setPermission(PublishPostAction::NAME, PostVoter::PUBLISH)
+            ;
     }
 
     public function configureFields(string $pageName): iterable

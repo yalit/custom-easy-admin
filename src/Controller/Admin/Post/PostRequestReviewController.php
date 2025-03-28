@@ -3,7 +3,7 @@
 namespace App\Controller\Admin\Post;
 
 use App\Entity\Post;
-use App\Process\Post\RequestReview;
+use App\Process\Post\PostRequestReview;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +20,7 @@ class PostRequestReviewController extends AbstractCrudController
 
     public function __invoke(AdminContext $context, Post $post): Response
     {
-        $this->messageBus->dispatch(new RequestReview($post));
+        $this->messageBus->dispatch(new PostRequestReview($post));
         $this->addFlash("success", sprintf("The post %s has been sent for review", $post->getTitle()));
 
         return $this->redirectToRoute('admin_post_index');

@@ -8,7 +8,7 @@ use App\Repository\PostRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-readonly class RequestReviewHandler
+readonly class ProjectRequestReviewHandler
 {
     public function __construct(
         private PostRepository $postRepository,
@@ -17,7 +17,7 @@ readonly class RequestReviewHandler
     {
     }
 
-    public function __invoke(RequestReview $requestReview): void
+    public function __invoke(PostRequestReview $requestReview): void
     {
         $post = $requestReview->post;
         if ($post->getStatus() !== PostStatus::DRAFT) {

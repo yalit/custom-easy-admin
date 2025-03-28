@@ -15,7 +15,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Zenstruck\Foundry\Attribute\WithStory;
 
 #[WithStory(InitialTestStateStory::class)]
-class PostListingRequestReviewTest extends AbstractAppCrudTestCase
+class PostRequestReviewActionTest extends AbstractAppCrudTestCase
 {
     public function testRequestReviewOnDraftPost(): void
     {

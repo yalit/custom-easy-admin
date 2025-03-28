@@ -6,50 +6,52 @@ use App\Entity\Enums\PostStatus;
 use App\Entity\Post;
 use App\Process\Post\PostRequestReview;
 use App\Process\Post\ProjectRequestReviewHandler;
+use App\Process\Post\PublishPost;
+use App\Process\Post\PublishPostHandler;
 use App\Tests\Integration\AbstractAppKernelTestCase;
 use App\Tests\Story\InitialTestStateStory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Zenstruck\Foundry\Attribute\WithStory;
 
 #[WithStory(InitialTestStateStory::class)]
-class RequestReviewProcessTest extends AbstractAppKernelTestCase
+class PublishPostHandlerTest extends AbstractAppKernelTestCase
 {
-    public static function nonDraftPostStatus(): iterable
+    public static function nonInReviewPostStatus(): iterable
     {
         return [
-            'In review' => [PostStatus::IN_REVIEW],
+            'Draft' => [PostStatus::DRAFT],
             'Published' => [PostStatus::PUBLISHED],
             'Archived' => [PostStatus::ARCHIVED],
             'Rejected' => [PostStatus::REJECTED],
         ];
     }
 
-    public function testRequestReviewForDraft(): void
+    public function testRequestReviewForInReview(): void
     {
-        $post = $this->getPost(PostStatus::DRAFT);
+        $post = $this->getPost(PostStatus::IN_REVIEW);
         $allChanges = $post->getStatusChanges();
         $nbChanges = count($allChanges);
-        $requestReview = new PostRequestReview($post);
+        $requestReview = new PublishPost($post);
 
-        $process = static::getContainer()->get(ProjectRequestReviewHandler::class);
+        $process = static::getContainer()->get(PublishPostHandler::class);
         $process($requestReview);
 
-        self::assertEquals(PostStatus::IN_REVIEW, $post->getStatus());
+        self::assertEquals(PostStatus::PUBLISHED, $post->getStatus());
         self::assertCount($nbChanges + 1, $post->getStatusChanges());
-        self::assertEquals(PostStatus::IN_REVIEW, $post->getStatusChanges()->first()->getCurrentStatus());
-        self::assertEquals(PostStatus::DRAFT, $post->getStatusChanges()->first()->getPreviousStatus());
+        self::assertEquals(PostStatus::PUBLISHED, $post->getStatusChanges()->first()->getCurrentStatus());
+        self::assertEquals(PostStatus::IN_REVIEW, $post->getStatusChanges()->first()->getPreviousStatus());
     }
 
-    #[DataProvider('nonDraftPostStatus')]
+    #[DataProvider('nonInReviewPostStatus')]
     public function testRequestReviewForNonDraft(PostStatus $status): void
     {
         $post = $this->getPost($status);
         $allChanges = $post->getStatusChanges();
         $nbChanges = count($allChanges);
         $currentStatus = $post->getStatus();
-        $requestReview = new PostRequestReview($post);
+        $requestReview = new PublishPost($post);
 
-        $process = static::getContainer()->get(ProjectRequestReviewHandler::class);
+        $process = static::getContainer()->get(PublishPostHandler::class);
         $process($requestReview);
 
         self::assertEquals($currentStatus, $post->getStatus());

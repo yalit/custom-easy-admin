@@ -3,7 +3,6 @@
 
 use App\Entity\Comment;
 use App\Entity\FormFieldReference;
-use App\Entity\Post;
 use App\Entity\Tag;
 use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -53,7 +52,7 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linktoDashboard('Dashboard', 'fa fa-home');
         yield MenuItem::linkToCrud('Users', 'fa fa-users', User::class);
-        yield MenuItem::linkToCrud('Blog Posts', 'fa fa-file-text-o', Post::class);
+        yield MenuItem::linkToCrud('Blog Posts', 'fa fa-file-text-o', PostCrudController::class);
         yield MenuItem::linkToCrud('Comments', 'far fa-comments', Comment::class);
         yield MenuItem::linkToCrud('Tags', 'fas fa-tags', Tag::class);
 

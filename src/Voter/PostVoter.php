@@ -17,6 +17,7 @@ class PostVoter extends Voter
     public const string EDIT =  'post_edit';
     public const string DELETE = 'post_delete';
     public const string REQUEST_REVIEW = 'post_request_review';
+    public const string PUBLISH = 'post_publish';
 
     public function __construct(private readonly Security $security)
     {
@@ -24,7 +25,7 @@ class PostVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return (in_array($attribute, [self::VIEW, self::EDIT, self::DELETE, self::REQUEST_REVIEW], true)
+        return (in_array($attribute, [self::VIEW, self::EDIT, self::DELETE, self::REQUEST_REVIEW, self::PUBLISH], true)
             && $subject instanceof Post) || $attribute === self::CREATE;
     }
 
@@ -45,6 +46,7 @@ class PostVoter extends Voter
             self::CREATE => $this->voteOnCreate($user),
             self::EDIT, self::DELETE => $this->voteOnEdit($user, $subject),
             self::REQUEST_REVIEW => $this->voteOnRequestReview($user, $subject),
+            self::PUBLISH => $this->voteOnPublishPost($user, $subject),
             default => false,
         };
     }
@@ -84,5 +86,14 @@ class PostVoter extends Voter
         }
 
         return $post->getAuthor()->getId() === $user->getId() || $this->security->isGranted(UserRole::ADMIN->value, $user);
+    }
+
+    protected function voteOnPublishPost(User $user, Post $post): bool
+    {
+        if ($post->getStatus() !== PostStatus::IN_REVIEW) {
+            return false;
+        }
+
+        return $this->security->isGranted(UserRole::PUBLISHER->value, $user);
     }
 }

@@ -41,19 +41,48 @@ final class PostFactory extends PersistentProxyObjectFactory
     }
 
     /**
+     * @return Proxy<Post>[]
+     */
+    public static function manyForStatus(PostStatus $status, int $nb = 10, UserRole $role = UserRole::AUTHOR): array
+    {
+        $posts = [];
+        for ($i = 0; $i < $nb; $i++) {
+            $posts[] = PostFactory::anyPost($status, $role);
+        }
+        return $posts;
+    }
+
+    /**
+     * @return Proxy<Post>
+     */
+    public static function anyPost(PostStatus $status, UserRole $role = UserRole::AUTHOR, ?Proxy $author = null): Proxy
+    {
+        $allPosts = PostFactory::all();
+        $posts = array_values(array_filter(
+                $allPosts,
+                fn(/** @param Proxy<Post> $p */ Proxy $p) => $p->getStatus() === $status
+                    && (!$author || $p->getAuthor()->getId() === $author->getId())
+            )
+        );
+        if (count($posts) !== 0) {
+            return $posts[0];
+        }
+
+        return match ($status) {
+            PostStatus::DRAFT => PostFactory::draft($role, $author),
+            PostStatus::PUBLISHED => PostFactory::published($role, $author),
+            PostStatus::IN_REVIEW => PostFactory::inReview($role, $author),
+            PostStatus::ARCHIVED => PostFactory::archived($role, $author),
+        };
+    }
+
+    /**
      * @param Proxy<User> $author
      * @return Proxy<Post>
      */
     public static function anyOwned(Proxy $author, PostStatus $status): Proxy
     {
-        $allPosts = PostFactory::all();
-
-        $posts = array_values(array_filter($allPosts, fn (/** @param Proxy<Post> $p */Proxy $p) => $p->getAuthor()->getId() === $author->getId() && $p->getStatus() === $status));
-        if (count($posts) === 0){
-            throw new Exception("Post not found");
-        }
-
-        return $posts[0];
+        return self::anyPost($status, author: $author);
     }
 
     /**
@@ -62,99 +91,91 @@ final class PostFactory extends PersistentProxyObjectFactory
      */
     public static function anyNotOwned(Proxy $author, PostStatus $status): Proxy
     {
-        $allPosts = PostFactory::all();
-
-        $post = array_values(array_filter($allPosts, fn (/** @param Proxy<Post> $p */Proxy $p) => $p->getAuthor()->getId() !== $author->getId() && $p->getStatus() === $status));
-        if (count($post) === 0){
-            throw new Exception("Post not found");
-        }
-
-        return $post[0];
+        $authors = UserFactory::all();
+        $notAuthor = array_values(array_filter($authors, fn(/** @var Proxy<User> $user */Proxy $user) => $user->getId() !== $author->getId()))[0];
+        return self::anyPost($status, author: $notAuthor);
     }
 
-    public static function draft(int $nb = 10, UserRole $role = UserRole::AUTHOR): void
+    /**
+     * @param Proxy<User> | null $author
+     * @return Proxy<Post>
+     */
+    public static function draft(UserRole $role = UserRole::AUTHOR, ?Proxy $author = null): Proxy
     {
-        for ($i = 0; $i < $nb; $i++) {
-            $author = PostFactory::getAuthor($role);
-            $post = PostFactory::new()
-                ->asDraft()
-                ->by($author)
-                ->with(['statusChanges' => [PostStatusChangeFactory::draftHistory($author)]])
-                ->create();
+        $author = $author ?? PostFactory::getAuthor($role);
+        $post = PostFactory::new()
+            ->asDraft()
+            ->by($author)
+            ->with(['statusChanges' => [PostStatusChangeFactory::draftHistory($author)]])
+            ->create();
 
-            PostFactory::addCommentToPost($post);
-        }
+        PostFactory::addCommentToPost($post);
+
+        return $post;
     }
 
-    public static function inReview(int $nb = 10, UserRole $role = UserRole::AUTHOR): void
+    /**
+     * @param Proxy<User> | null $author
+     * @return Proxy<Post>
+     */
+    public static function inReview(UserRole $role = UserRole::AUTHOR, ?Proxy $author = null): Proxy
     {
-        for ($i = 0; $i < $nb; $i++) {
-            $author = PostFactory::getAuthor($role);
+        $author = $author ?? PostFactory::getAuthor($role);
+        $post = PostFactory::new()
+            ->asInReview()
+            ->by($author)
+            ->with(['statusChanges' => PostStatusChangeFactory::inReviewHistory($author)])
+            ->create();
 
-            $post = PostFactory::new()
-                ->asInReview()
-                ->by($author)
-                ->with(['statusChanges' => PostStatusChangeFactory::inReviewHistory($author)])
-                ->create();
+        PostFactory::addCommentToPost($post);
 
-            PostFactory::addCommentToPost($post);
-        }
+        return $post;
     }
 
-    public static function published(int $nb = 10, UserRole $role = UserRole::AUTHOR): void
+    /**
+     * @param Proxy<User> | null $author
+     * @return Proxy<Post>
+     */
+    public static function published(UserRole $role = UserRole::AUTHOR, ?Proxy $author = null): Proxy
     {
-        for ($i = 0; $i < $nb; $i++) {
-            $author = PostFactory::getAuthor($role);
-            $publisher = UserFactory::anyPublisher();
+        $author = $author ?? PostFactory::getAuthor($role);
+        $publisher = UserFactory::anyPublisher();
+        $post = PostFactory::new()
+            ->asPublished()
+            ->by($author)
+            ->with(['statusChanges' => PostStatusChangeFactory::inPublishHistory($author, $publisher)])
+            ->create();
 
-            $post = PostFactory::new()
-                ->asPublished()
-                ->by($author)
-                ->with(['statusChanges' => PostStatusChangeFactory::inPublishHistory($author, $publisher)])
-                ->create();
+        PostFactory::addCommentToPost($post);
 
-            PostFactory::addCommentToPost($post);
-        }
+        return $post;
     }
 
-    public static function archived(int $nb = 10, UserRole $role = UserRole::AUTHOR): void
+    /**
+     * @param Proxy<User> | null $author
+     * @return Proxy<Post>
+     */
+    public static function archived(UserRole $role = UserRole::AUTHOR, ?Proxy $author = null): Proxy
     {
-        for ($i = 0; $i < $nb; $i++) {
-            $author = PostFactory::getAuthor($role);
-            $publisher = UserFactory::anyPublisher();
+        $author = $author ?? PostFactory::getAuthor($role);
+        $publisher = UserFactory::anyPublisher();
+        $post = PostFactory::new()
+            ->asArchived()
+            ->by($author)
+            ->with(['statusChanges' => PostStatusChangeFactory::inArchivedHistory($author, $publisher)])
+            ->create();
 
-            $post = PostFactory::new()
-                ->asArchived()
-                ->by($author)
-                ->with(['statusChanges' => PostStatusChangeFactory::inArchivedHistory($author, $publisher)])
-                ->create();
+        PostFactory::addCommentToPost($post);
 
-            PostFactory::addCommentToPost($post);
-        }
+        return $post;
     }
 
-    public static function rejected(int $nb = 10, UserRole $role = UserRole::AUTHOR): void
-    {
-        for ($i = 0; $i < $nb; $i++) {
-            $author = PostFactory::getAuthor($role);
-            $publisher = UserFactory::anyPublisher();
-
-            $post = PostFactory::new()
-                ->asRejected()
-                ->by($author)
-                ->with(['statusChanges' => PostStatusChangeFactory::inRejectedHistory($author, $publisher)])
-                ->create();
-
-            PostFactory::addCommentToPost($post);
-        }
-    }
-
-    public function by(Proxy $author): self
+    private function by(Proxy $author): self
     {
         return $this->with(['author' => $author]);
     }
 
-    public function asDraft(): self
+    private function asDraft(): self
     {
         return $this->with([
                 'status' => PostStatus::DRAFT
@@ -162,28 +183,28 @@ final class PostFactory extends PersistentProxyObjectFactory
         );
     }
 
-    public function asInReview(): self
+    private function asInReview(): self
     {
         return $this->with([
             'status' => PostStatus::IN_REVIEW,
         ]);
     }
 
-    public function asPublished(): self
+    private function asPublished(): self
     {
         return $this->with([
             'status' => PostStatus::PUBLISHED,
         ]);
     }
 
-    public function asArchived(): self
+    private function asArchived(): self
     {
         return $this->with([
             'status' => PostStatus::ARCHIVED,
         ]);
     }
 
-    public function asRejected(): self
+    private function asRejected(): self
     {
         return $this->with([
             'status' => PostStatus::REJECTED,

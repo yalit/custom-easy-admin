@@ -2,6 +2,7 @@
 
 namespace App\Tests\Story;
 
+use App\Entity\Enums\PostStatus;
 use App\Entity\Enums\UserRole;
 use App\Story\Factory\PostFactory;
 use App\Story\Factory\TagFactory;
@@ -16,15 +17,13 @@ final class InitialTestStateStory extends Story
         UserFactory::admin();
         UserFactory::anyPublisher();
         UserFactory::anyAuthor();
-        PostFactory::draft(1);
-        PostFactory::inReview(1);
-        PostFactory::published(1);
-        PostFactory::archived(1);
-        PostFactory::rejected(1);
-        PostFactory::draft(1, UserRole::ADMIN);
-        PostFactory::inReview(1, UserRole::ADMIN);
-        PostFactory::published(1, UserRole::ADMIN);
-        PostFactory::archived(1, UserRole::ADMIN);
-        PostFactory::rejected(1, UserRole::ADMIN);
+        PostFactory::manyForStatus(PostStatus::DRAFT, 1);
+        PostFactory::manyForStatus(PostStatus::IN_REVIEW, 1);
+        PostFactory::manyForStatus(PostStatus::PUBLISHED, 1);
+        PostFactory::manyForStatus(PostStatus::ARCHIVED, 1);
+        PostFactory::manyForStatus(PostStatus::DRAFT, 1, UserRole::ADMIN);
+        PostFactory::manyForStatus(PostStatus::IN_REVIEW, 1, UserRole::ADMIN);
+        PostFactory::manyForStatus(PostStatus::PUBLISHED, 1, UserRole::ADMIN);
+        PostFactory::manyForStatus(PostStatus::ARCHIVED, 1, UserRole::ADMIN);
     }
 }

@@ -15,10 +15,10 @@ final class InitialStateStory extends Story
         UserFactory::admin();
         UserFactory::publisher();
         UserFactory::author();
-        PostFactory::draft(5);
-        PostFactory::inReview(5);
-        PostFactory::published(5);
-        PostFactory::archived(5);
+        PostFactory::manyDraft(5);
+        PostFactory::manyInReview(5);
+        PostFactory::manyPublished(5);
+        PostFactory::manyArchived(5);
         PostFactory::rejected(5);
     }
 }

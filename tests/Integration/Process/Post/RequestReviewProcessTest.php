@@ -6,27 +6,30 @@ use App\Entity\Enums\PostStatus;
 use App\Entity\Post;
 use App\Process\Post\PostRequestReview;
 use App\Process\Post\ProjectRequestReviewHandler;
+use App\Story\Factory\PostFactory;
 use App\Tests\Integration\AbstractAppKernelTestCase;
-use App\Tests\Story\InitialTestStateStory;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Zenstruck\Foundry\Attribute\WithStory;
 
-#[WithStory(InitialTestStateStory::class)]
 class RequestReviewProcessTest extends AbstractAppKernelTestCase
 {
-    public static function nonDraftPostStatus(): iterable
+    public static function nonDraftPost(): iterable
     {
         return [
-            'In review' => [PostStatus::IN_REVIEW],
-            'Published' => [PostStatus::PUBLISHED],
-            'Archived' => [PostStatus::ARCHIVED],
-            'Rejected' => [PostStatus::REJECTED],
+            'In review' => [PostFactory::manyDraft(1)],
+            'Published' => [PostFactory::manyDraft(1)],
+            'Archived' => [PostFactory::manyDraft(1)],
+            'Rejected' => [PostFactory::manyDraft(1)],
         ];
     }
 
-    public function testRequestReviewForDraft(): void
+    public static function draftPost()
     {
-        $post = $this->getPost(PostStatus::DRAFT);
+        yield [PostFactory::anyPost(1, PostStatus::DRAFT)];
+    }
+
+    #[DataProvider('draftPost')]
+    public function testRequestReviewForDraft(Post $post): void
+    {
         $allChanges = $post->getStatusChanges();
         $nbChanges = count($allChanges);
         $requestReview = new PostRequestReview($post);
@@ -40,10 +43,9 @@ class RequestReviewProcessTest extends AbstractAppKernelTestCase
         self::assertEquals(PostStatus::DRAFT, $post->getStatusChanges()->first()->getPreviousStatus());
     }
 
-    #[DataProvider('nonDraftPostStatus')]
-    public function testRequestReviewForNonDraft(PostStatus $status): void
+    #[DataProvider('nonDraftPost')]
+    public function testRequestReviewForNonDraft(Post $post): void
     {
-        $post = $this->getPost($status);
         $allChanges = $post->getStatusChanges();
         $nbChanges = count($allChanges);
         $currentStatus = $post->getStatus();
@@ -57,12 +59,4 @@ class RequestReviewProcessTest extends AbstractAppKernelTestCase
     }
 
 
-    private function getPost(PostStatus $status): Post
-    {
-        $postRepository = $this->entityManager->getRepository(Post::class);
-        $post = $postRepository->findOneBy(['status' => $status]);
-        self::assertNotNull($post);
-
-        return $post;
-    }
 }

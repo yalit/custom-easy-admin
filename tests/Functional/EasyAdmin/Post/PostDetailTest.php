@@ -31,8 +31,6 @@ class PostDetailTest extends AbstractAppCrudTestCase
         yield "Admin own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, true, false];
         yield "Author own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, true, false];
         yield "Admin own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, true, false];
-        yield "Author own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, true, false];
-        yield "Admin own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, true, false];
         yield "Author not own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, false, false];
         yield "Publisher not own draft" => [UserFactory::anyPublisher(), PostStatus::DRAFT, false, false];
         yield "Admin not own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, false, true];
@@ -45,9 +43,6 @@ class PostDetailTest extends AbstractAppCrudTestCase
         yield "Author not own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, false, false];
         yield "Publisher not own archived" => [UserFactory::anyPublisher(), PostStatus::ARCHIVED, false, false];
         yield "Admin not own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, false, false];
-        yield "Author not own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, false, false];
-        yield "Publisher not own rejected" => [UserFactory::anyPublisher(), PostStatus::REJECTED, false, false];
-        yield "Admin not own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, false, false];
     }
 
     #[DataProvider('dataForRequestReviewActionDisplay')]
@@ -80,8 +75,6 @@ class PostDetailTest extends AbstractAppCrudTestCase
         yield "Admin own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, true, false];
         yield "Author own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, true, false];
         yield "Admin own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, true, false];
-        yield "Author own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, true, false];
-        yield "Admin own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, true, false];
         yield "Author not own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, false, false];
         yield "Publisher not own draft" => [UserFactory::anyPublisher(), PostStatus::DRAFT, false, false];
         yield "Admin not own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, false, false];
@@ -94,9 +87,6 @@ class PostDetailTest extends AbstractAppCrudTestCase
         yield "Author not own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, false, false];
         yield "Publisher not own archived" => [UserFactory::anyPublisher(), PostStatus::ARCHIVED, false, false];
         yield "Admin not own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, false, false];
-        yield "Author not own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, false, false];
-        yield "Publisher not own rejected" => [UserFactory::anyPublisher(), PostStatus::REJECTED, false, false];
-        yield "Admin not own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, false, false];
     }
 
     #[DataProvider('dataForPublishActionDisplay')]

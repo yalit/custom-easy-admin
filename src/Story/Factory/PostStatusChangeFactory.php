@@ -47,7 +47,7 @@ final class PostStatusChangeFactory extends PersistentProxyObjectFactory
 
     /**
      * @param Proxy<User> $author
-     * @return Proxy
+     * @return Proxy<PostStatusChange>[]
      */
     public static function inReviewHistory(Proxy $author, ?DateTimeImmutable $date = null): array
     {
@@ -68,7 +68,7 @@ final class PostStatusChangeFactory extends PersistentProxyObjectFactory
 
     /**
      * @param Proxy<User> $author
-     * @return Proxy
+     * @return Proxy<PostStatusChange<[]
      */
     public static function inRejectedHistory(Proxy $author, Proxy $publisher, ?DateTimeImmutable $date = null): array
     {
@@ -94,7 +94,7 @@ final class PostStatusChangeFactory extends PersistentProxyObjectFactory
 
     /**
      * @param Proxy<User> $author
-     * @return Proxy
+     * @return Proxy<PostStatusChange<[]
      */
     public static function inPublishHistory(Proxy $author, Proxy $publisher, ?DateTimeImmutable $date = null): array
     {
@@ -120,7 +120,7 @@ final class PostStatusChangeFactory extends PersistentProxyObjectFactory
 
     /**
      * @param Proxy<User> $author
-     * @return Proxy
+     * @return Proxy<PostStatusChange>[]
      */
     public static function inArchivedHistory(Proxy $author, Proxy $publisher, ?DateTimeImmutable $date = null): array
     {

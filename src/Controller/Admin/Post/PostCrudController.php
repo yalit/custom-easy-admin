@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin\Post;
 
+use App\Admin\Action\Post\PostArchiveAction;
 use App\Admin\Action\Post\PostRejectReviewAction;
 use App\Admin\Action\Post\PostRequestReviewAction;
 use App\Admin\Action\Post\PublishPostAction;
@@ -55,6 +56,10 @@ class PostCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, PublishPostAction::create())
             ->add(Crud::PAGE_DETAIL, PublishPostAction::create())
             ->setPermission(PublishPostAction::NAME, PostVoter::PUBLISH)
+            //Post Archive
+            ->add(Crud::PAGE_INDEX, PostArchiveAction::create())
+            ->add(Crud::PAGE_DETAIL, PostArchiveAction::create())
+            ->setPermission(PostArchiveAction::NAME, PostVoter::ARCHIVE)
             ;
     }
 

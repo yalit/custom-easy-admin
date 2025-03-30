@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional\EasyAdmin\Post;
 
+use App\Admin\Action\Post\PostArchiveAction;
 use App\Admin\Action\Post\PostRejectReviewAction;
 use App\Admin\Action\Post\PublishPostAction;
 use App\Admin\Action\Post\PostRequestReviewAction;
@@ -346,6 +347,52 @@ class PostListingTest extends AbstractAppCrudTestCase
             $this->assertIndexEntityActionExists(PostRejectReviewAction::NAME, $post->getId());
         } else {
             $this->assertIndexEntityActionNotExists(PostRejectReviewAction::NAME, $post->getId());
+        }
+    }
+
+    public static function postArchivePostVisibilityProvider(): iterable
+    {
+        yield "Author own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "own", false];
+        yield "Admin own draft" => [UserRole::ADMIN, PostStatus::DRAFT, "own", false];
+        yield "Author own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, "own", false];
+        yield "Admin own in review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, "own", false];
+        yield "Author own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, "own", true];
+        yield "Admin own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, "own", true];
+        yield "Author own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, "own", false];
+        yield "Admin own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, "own", false];
+
+        yield "Author not own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "notOwn", false];
+        yield "Publisher not own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "notOwn", false];
+        yield "Admin not own draft" => [UserRole::ADMIN, PostStatus::DRAFT, "notOwn", false];
+        yield "Author not own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Publisher not own in-review" => [UserRole::PUBLISHER, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Admin not own in-review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Author not own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Publisher not own published" => [UserRole::PUBLISHER, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Admin not own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, "notOwn", true];
+        yield "Author not own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Publisher not own archived" => [UserRole::PUBLISHER, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Admin not own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, "notOwn", false];
+    }
+
+    #[DataProvider('postArchivePostVisibilityProvider')]
+    public function testPostArchiveActionVisibility(UserRole $userRole, PostStatus $status, string $whichPost, bool $visible): void
+    {
+        $user = $this->anyUser($userRole);
+        $this->login($user->getEmail());
+        $this->client->request("GET", $this->generateIndexUrl());
+        self::assertResponseIsSuccessful();
+
+        $post = match($whichPost) {
+            "own" => $this->anyPostOwned($user, $status),
+            'notOwn' => $this->anyPostNotOwned($user, $status),
+        };
+        self::assertNotNull($post);
+
+        if ($visible) {
+            $this->assertIndexEntityActionExists(PostArchiveAction::NAME, $post->getId());
+        } else {
+            $this->assertIndexEntityActionNotExists(PostArchiveAction::NAME, $post->getId());
         }
     }
 

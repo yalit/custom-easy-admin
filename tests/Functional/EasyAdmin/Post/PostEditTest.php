@@ -5,17 +5,11 @@ namespace App\Tests\Functional\EasyAdmin\Post;
 use App\Controller\Admin\Post\PostCrudController;
 use App\Entity\Enums\PostStatus;
 use App\Entity\Enums\UserRole;
-use App\Entity\User;
-use App\Story\Factory\PostFactory;
-use App\Story\Factory\UserFactory;
 use App\Tests\Functional\EasyAdmin\AbstractAppCrudTestCase;
-use App\Tests\Story\InitialTestStateStory;
 use App\Tests\Trait\AdditionalCrudAsserts;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpFoundation\Request;
-use Zenstruck\Foundry\Attribute\WithStory;
 
-#[WithStory(InitialTestStateStory::class)]
 class PostEditTest extends AbstractAppCrudTestCase
 {
     use AdditionalCrudAsserts;

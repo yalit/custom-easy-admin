@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin\Post;
 
+use App\Admin\Action\Post\PostRejectReviewAction;
 use App\Admin\Action\Post\PostRequestReviewAction;
 use App\Admin\Action\Post\PublishPostAction;
 use App\Admin\Field\EnumField;
@@ -41,10 +42,16 @@ class PostCrudController extends AbstractCrudController
             ->setPermission(Action::NEW, PostVoter::CREATE)
             ->setPermission(Action::EDIT, PostVoter::EDIT)
             ->setPermission(Action::DELETE, PostVoter::DELETE)
+            //Post Request Review
             ->add(Crud::PAGE_INDEX, PostRequestReviewAction::create())
             ->add(Crud::PAGE_DETAIL, PostRequestReviewAction::create())
             ->add(Crud::PAGE_EDIT, PostRequestReviewAction::create())
             ->setPermission(PostRequestReviewAction::NAME, PostVoter::REQUEST_REVIEW)
+            //Post Reject Review
+            ->add(Crud::PAGE_INDEX, PostRejectReviewAction::create())
+            ->add(Crud::PAGE_DETAIL, PostRejectReviewAction::create())
+            ->setPermission(PostRejectReviewAction::NAME, PostVoter::REJECT_REVIEW)
+            //Post Publish
             ->add(Crud::PAGE_INDEX, PublishPostAction::create())
             ->add(Crud::PAGE_DETAIL, PublishPostAction::create())
             ->setPermission(PublishPostAction::NAME, PostVoter::PUBLISH)

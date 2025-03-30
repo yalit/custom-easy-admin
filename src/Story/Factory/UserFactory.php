@@ -45,9 +45,9 @@ final class UserFactory extends PersistentProxyObjectFactory
     }
 
     /**
-     * @return Proxy
+     * @return Proxy<User>[]
      */
-    public static function publisher(string $name = "Publisher", int $nb = 5): array
+    public static function publishers(string $name = "Publisher", int $nb = 5): array
     {
         return UserFactory::new()
             ->asPublisher()
@@ -61,9 +61,9 @@ final class UserFactory extends PersistentProxyObjectFactory
     }
 
     /**
-     * @return Proxy
+     * @return Proxy<User>[]
      */
-    public static function author(string $name = "Author", int $nb = 5): array
+    public static function authors(string $name = "Author", int $nb = 5): array
     {
         return UserFactory::new()
             ->asAuthor()
@@ -89,7 +89,7 @@ final class UserFactory extends PersistentProxyObjectFactory
      */
     public static function anyAuthor(string $name = "Author"): Proxy
     {
-        return self::anyUserWithRole(UserRole::AUTHOR) ?? self::author($name, 1)[0];
+        return self::anyUserWithRole(UserRole::AUTHOR) ?? self::authors($name, 1)[0];
     }
 
     /**
@@ -97,7 +97,7 @@ final class UserFactory extends PersistentProxyObjectFactory
      */
     public static function anyPublisher(string $name = "Publisher"): Proxy
     {
-        return self::anyUserWithRole(UserRole::PUBLISHER) ?? self::publisher($name, 1)[0];
+        return self::anyUserWithRole(UserRole::PUBLISHER) ?? self::publishers($name, 1)[0];
     }
 
     /**

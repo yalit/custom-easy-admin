@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Story\Factory\UserFactory;
+use App\Tests\Trait\GetTestData;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -12,7 +13,7 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 
 abstract class AbstractAppWebTestCase extends WebTestCase
 {
-    use ResetDatabase, Factories;
+    use GetTestData;
 
     protected KernelBrowser $client;
     protected EntityManagerInterface $entityManager;

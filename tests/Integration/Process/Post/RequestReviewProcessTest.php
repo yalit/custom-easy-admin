@@ -3,33 +3,16 @@
 namespace App\Tests\Integration\Process\Post;
 
 use App\Entity\Enums\PostStatus;
-use App\Entity\Post;
 use App\Process\Post\PostRequestReview;
 use App\Process\Post\ProjectRequestReviewHandler;
-use App\Story\Factory\PostFactory;
 use App\Tests\Integration\AbstractAppKernelTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class RequestReviewProcessTest extends AbstractAppKernelTestCase
 {
-    public static function nonDraftPost(): iterable
+    public function testRequestReviewForDraft(): void
     {
-        return [
-            'In review' => [PostFactory::manyDraft(1)],
-            'Published' => [PostFactory::manyDraft(1)],
-            'Archived' => [PostFactory::manyDraft(1)],
-            'Rejected' => [PostFactory::manyDraft(1)],
-        ];
-    }
-
-    public static function draftPost()
-    {
-        yield [PostFactory::anyPost(1, PostStatus::DRAFT)];
-    }
-
-    #[DataProvider('draftPost')]
-    public function testRequestReviewForDraft(Post $post): void
-    {
+        $post = $this->anyPost(PostStatus::DRAFT);
         $allChanges = $post->getStatusChanges();
         $nbChanges = count($allChanges);
         $requestReview = new PostRequestReview($post);
@@ -43,9 +26,19 @@ class RequestReviewProcessTest extends AbstractAppKernelTestCase
         self::assertEquals(PostStatus::DRAFT, $post->getStatusChanges()->first()->getPreviousStatus());
     }
 
-    #[DataProvider('nonDraftPost')]
-    public function testRequestReviewForNonDraft(Post $post): void
+    public static function nonDraftPost(): iterable
     {
+        return [
+            'In review' => [PostStatus::IN_REVIEW],
+            'Published' => [PostStatus::PUBLISHED],
+            'Archived' => [PostStatus::ARCHIVED],
+        ];
+    }
+
+    #[DataProvider('nonDraftPost')]
+    public function testRequestReviewForNonDraft(PostStatus $status): void
+    {
+        $post = $this->anyPost($status);
         $allChanges = $post->getStatusChanges();
         $nbChanges = count($allChanges);
         $currentStatus = $post->getStatus();

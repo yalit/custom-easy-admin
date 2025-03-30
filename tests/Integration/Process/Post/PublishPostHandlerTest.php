@@ -13,22 +13,11 @@ use App\Tests\Story\InitialTestStateStory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Zenstruck\Foundry\Attribute\WithStory;
 
-#[WithStory(InitialTestStateStory::class)]
 class PublishPostHandlerTest extends AbstractAppKernelTestCase
 {
-    public static function nonInReviewPostStatus(): iterable
+    public function testPublishPostForInReview(): void
     {
-        return [
-            'Draft' => [PostStatus::DRAFT],
-            'Published' => [PostStatus::PUBLISHED],
-            'Archived' => [PostStatus::ARCHIVED],
-            'Rejected' => [PostStatus::REJECTED],
-        ];
-    }
-
-    public function testRequestReviewForInReview(): void
-    {
-        $post = $this->getPost(PostStatus::IN_REVIEW);
+        $post = $this->anyPost(PostStatus::IN_REVIEW);
         $allChanges = $post->getStatusChanges();
         $nbChanges = count($allChanges);
         $requestReview = new PublishPost($post);
@@ -42,10 +31,19 @@ class PublishPostHandlerTest extends AbstractAppKernelTestCase
         self::assertEquals(PostStatus::IN_REVIEW, $post->getStatusChanges()->first()->getPreviousStatus());
     }
 
-    #[DataProvider('nonInReviewPostStatus')]
-    public function testRequestReviewForNonDraft(PostStatus $status): void
+    public static function nonInReviewPostStatus(): iterable
     {
-        $post = $this->getPost($status);
+        return [
+            'Draft' => [PostStatus::DRAFT],
+            'Published' => [PostStatus::PUBLISHED],
+            'Archived' => [PostStatus::ARCHIVED],
+        ];
+    }
+
+    #[DataProvider('nonInReviewPostStatus')]
+    public function testPublishPostForNotInReview(PostStatus $status): void
+    {
+        $post = $this->anyPost($status);
         $allChanges = $post->getStatusChanges();
         $nbChanges = count($allChanges);
         $currentStatus = $post->getStatus();
@@ -56,15 +54,5 @@ class PublishPostHandlerTest extends AbstractAppKernelTestCase
 
         self::assertEquals($currentStatus, $post->getStatus());
         self::assertCount($nbChanges, $post->getStatusChanges());
-    }
-
-
-    private function getPost(PostStatus $status): Post
-    {
-        $postRepository = $this->entityManager->getRepository(Post::class);
-        $post = $postRepository->findOneBy(['status' => $status]);
-        self::assertNotNull($post);
-
-        return $post;
     }
 }

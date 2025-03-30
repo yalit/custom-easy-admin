@@ -61,6 +61,7 @@ final class PostFactory extends PersistentProxyObjectFactory
         $posts = array_values(array_filter(
                 $allPosts,
                 fn(/** @param Proxy<Post> $p */ Proxy $p) => $p->getStatus() === $status
+                    && in_array($role, $p->getAuthor()->getRoles())
                     && (!$author || $p->getAuthor()->getId() === $author->getId())
             )
         );
@@ -201,13 +202,6 @@ final class PostFactory extends PersistentProxyObjectFactory
     {
         return $this->with([
             'status' => PostStatus::ARCHIVED,
-        ]);
-    }
-
-    private function asRejected(): self
-    {
-        return $this->with([
-            'status' => PostStatus::REJECTED,
         ]);
     }
 

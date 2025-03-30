@@ -5,33 +5,28 @@ declare(strict_types=1);
 namespace App\Tests\Functional\EasyAdmin\User;
 
 use App\Controller\Admin\UserCrudController;
+use App\Entity\Enums\UserRole;
 use App\Entity\User;
 use App\Tests\Functional\EasyAdmin\AbstractAppCrudTestCase;
-use App\Tests\Story\FunctionalTestStory;
-use App\Tests\Story\InitialTestStateStory;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Test\Trait\CrudTestIndexAsserts;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Zenstruck\Foundry\Attribute\WithStory;
 
-#[WithStory(InitialTestStateStory::class)]
 class UserListingTest extends AbstractAppCrudTestCase
 {
     use CrudTestIndexAsserts;
 
-    public static function allUsers(): array
+    public static function allUserRoles(): iterable
     {
-        return FunctionalTestStory::oneUserOfEach();
+        yield "Author" => [UserRole::AUTHOR];
+        yield "Admin" => [UserRole::ADMIN];
+        yield "Publisher" => [UserRole::PUBLISHER];
     }
 
-    public static function nonAdminUsers(): array
+    #[DataProvider('allUserRoles')]
+    public function testUserIndexDisplays(UserRole $userRole): void
     {
-        return FunctionalTestStory::noAdminUsers();
-    }
-
-    #[DataProvider('allUsers')]
-    public function testUserIndexDisplays(User $user): void
-    {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
         $this->assertResponseIsSuccessful();
@@ -64,9 +59,16 @@ class UserListingTest extends AbstractAppCrudTestCase
         $this->assertIndexEntityActionExists(Action::DELETE, $user->getId());
     }
 
-    #[DataProvider('nonAdminUsers')]
-    public function testGenericUserActionsDisplaysForNonAdmin(User $user): void
+    public static function nonAdminUsers(): iterable
     {
+        yield "Author" => [UserRole::AUTHOR];
+        yield "Publisher" => [UserRole::PUBLISHER];
+    }
+
+    #[DataProvider('nonAdminUsers')]
+    public function testGenericUserActionsDisplaysForNonAdmin(UserRole $userRole): void
+    {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
 

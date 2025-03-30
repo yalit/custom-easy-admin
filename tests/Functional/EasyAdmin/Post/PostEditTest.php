@@ -4,12 +4,13 @@ namespace App\Tests\Functional\EasyAdmin\Post;
 
 use App\Controller\Admin\Post\PostCrudController;
 use App\Entity\Enums\PostStatus;
+use App\Entity\Enums\UserRole;
 use App\Entity\User;
 use App\Story\Factory\PostFactory;
 use App\Story\Factory\UserFactory;
 use App\Tests\Functional\EasyAdmin\AbstractAppCrudTestCase;
-use App\Tests\Functional\EasyAdmin\Trait\AdditionalCrudAsserts;
 use App\Tests\Story\InitialTestStateStory;
+use App\Tests\Trait\AdditionalCrudAsserts;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Zenstruck\Foundry\Attribute\WithStory;
@@ -21,19 +22,20 @@ class PostEditTest extends AbstractAppCrudTestCase
 
     public static function dataForReviewActionDisplay(): iterable
     {
-        yield "Author own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, true, true];
-        yield "Admin own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, true, true];
-        yield "Admin not own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, false, true];
+        yield "Author own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, true, true];
+        yield "Admin own draft" => [UserRole::ADMIN, PostStatus::DRAFT, true, true];
+        yield "Admin not own draft" => [UserRole::ADMIN, PostStatus::DRAFT, false, true];
     }
 
     #[DataProvider('dataForReviewActionDisplay')]
-    public function testRequestReviewActionDisplayed(User $user, PostStatus $status, bool $ownPost, bool $visible): void
+    public function testRequestReviewActionDisplayed(UserRole $userRole, PostStatus $status, bool $ownPost, bool $visible): void
     {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
 
         $post = match($ownPost) {
-            true => PostFactory::anyOwned($user, $status),
-            false => PostFactory::anyNotOwned($user, $status),
+            true => $this->anyPostOwned($user, $status),
+            false => $this->anyPostNotOwned($user, $status),
         };
 
         $this->client->request(Request::METHOD_GET, $this->generateEditFormUrl($post->getId()));

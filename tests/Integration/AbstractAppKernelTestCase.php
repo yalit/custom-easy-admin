@@ -3,15 +3,14 @@
 namespace App\Tests\Integration;
 
 use App\Repository\UserRepository;
+use App\Tests\Trait\GetTestData;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\Security;
-use Zenstruck\Foundry\Test\Factories;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 abstract class AbstractAppKernelTestCase extends KernelTestCase
 {
-    use ResetDatabase, Factories;
+    use GetTestData;
 
     protected EntityManagerInterface $entityManager;
 

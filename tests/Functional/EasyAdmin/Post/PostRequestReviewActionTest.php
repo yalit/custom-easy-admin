@@ -5,16 +5,13 @@ namespace App\Tests\Functional\EasyAdmin\Post;
 use App\Controller\Admin\Post\PostCrudController;
 use App\Controller\Admin\Post\PostRequestReviewController;
 use App\Entity\Enums\PostStatus;
-use App\Entity\Post;
+use App\Entity\Pos;
 use App\Tests\Functional\EasyAdmin\AbstractAppCrudTestCase;
-use App\Tests\Story\InitialTestStateStory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Zenstruck\Foundry\Attribute\WithStory;
 
-#[WithStory(InitialTestStateStory::class)]
 class PostRequestReviewActionTest extends AbstractAppCrudTestCase
 {
     public function testRequestReviewOnDraftPost(): void
@@ -24,7 +21,7 @@ class PostRequestReviewActionTest extends AbstractAppCrudTestCase
         $translator = static::getContainer()->get(TranslatorInterface::class);
         $this->login();
 
-        $post = $this->getPost(PostStatus::DRAFT);
+        $post = $this->anyPost(PostStatus::DRAFT);
         self::assertNotNull($post);
 
         $url = $urlGenerator->setRoute(PostRequestReviewController::CRUD_ROUTE_NAME, ['id' => $post->getId()])->generateUrl();
@@ -40,10 +37,5 @@ class PostRequestReviewActionTest extends AbstractAppCrudTestCase
     protected function getControllerFqcn(): string
     {
         return PostCrudController::class;
-    }
-
-    private function getPost(PostStatus $status): ?Post
-    {
-        return $this->entityManager->getRepository(Post::class)->findOneBy(['status' => $status]);
     }
 }

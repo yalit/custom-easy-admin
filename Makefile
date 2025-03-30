@@ -22,10 +22,10 @@ db-init-test:
 	bin/console d:s:u --force --env=test
 
 db-fixtures: db-init-dev
-	bin/console app:fixtures
+	bin/console  doctrine:fixtures:load -n
 
 db-fixtures-test: db-init-test
-	bin/console app:fixtures --env=test
+	bin/console  doctrine:fixtures:load --env=test -n
 
 tests:
 	./vendor/bin/phpunit --testdox

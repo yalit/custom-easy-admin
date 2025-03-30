@@ -4,21 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Security;
 
-use App\Entity\User;
+use App\Entity\Enums\UserRole;
 use App\Story\Factory\UserFactory;
 use App\Tests\AbstractAppWebTestCase;
-use App\Tests\Story\FunctionalTestStory;
-use App\Tests\Story\InitialTestStateStory;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Zenstruck\Foundry\Attribute\WithStory;
-use Zenstruck\Foundry\Test\Factories;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
-#[WithStory(InitialTestStateStory::class)]
 class LoginTestCaseTest extends AbstractAppWebTestCase
 {
-    use ResetDatabase, Factories;
-
     public function testLoginAccessIsPublic(): void
     {
         $this->client->request('GET', '/login');
@@ -27,9 +19,17 @@ class LoginTestCaseTest extends AbstractAppWebTestCase
         $this->assertSelectorExists('form#login');
     }
 
-    #[DataProvider('loginUserEmails')]
-    public function testLoginForUser(User $user): void
+    public static function loginUserRoles(): iterable
     {
+        yield "Author" => [UserRole::AUTHOR];
+        yield "Admin" => [UserRole::ADMIN];
+        yield "Publisher" => [UserRole::PUBLISHER];
+    }
+
+    #[DataProvider('loginUserRoles')]
+    public function testLoginForUser(UserRole $role): void
+    {
+        $user = $this->anyUser($role);
         $this->client->request('GET', '/login');
 
         $this->client->submitForm('login_submit', [
@@ -43,10 +43,5 @@ class LoginTestCaseTest extends AbstractAppWebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertRouteSame('admin');
-    }
-
-    public static function loginUserEmails(): array
-    {
-        return FunctionalTestStory::oneUserOfEach();
     }
 }

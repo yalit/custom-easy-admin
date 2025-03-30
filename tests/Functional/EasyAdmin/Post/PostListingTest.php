@@ -6,43 +6,43 @@ use App\Admin\Action\Post\PublishPostAction;
 use App\Admin\Action\Post\PostRequestReviewAction;
 use App\Controller\Admin\Post\PostCrudController;
 use App\Entity\Enums\PostStatus;
-use App\Entity\Post;
+use App\Entity\Enums\UserRole;
 use App\Entity\User;
-use App\Story\Factory\UserFactory;
 use App\Tests\Functional\EasyAdmin\AbstractAppCrudTestCase;
-use App\Tests\Story\FunctionalTestStory;
-use App\Tests\Story\InitialTestStateStory;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Test\Trait\CrudTestIndexAsserts;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Zenstruck\Foundry\Attribute\WithStory;
 
-#[WithStory(InitialTestStateStory::class)]
 class PostListingTest extends AbstractAppCrudTestCase
 {
     use CrudTestIndexAsserts;
 
-    public static function allUsersProvider(): array
+    public static function allUsersProvider(): iterable 
     {
-        return FunctionalTestStory::oneUserOfEach();
+        yield "Author" => [UserRole::AUTHOR];
+        yield "Admin" => [UserRole::ADMIN];
+        yield "Publisher" => [UserRole::PUBLISHER];
     }
 
     #[DataProvider('allUsersProvider')]
-    public function testPostIndexDisplays(User $user): void
+    public function testPostIndexDisplays(UserRole $userRole): void
     {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
         $this->assertResponseIsSuccessful();
     }
 
-    public static function nonAdminUsersProvider(): array
+    public static function nonAdminUsersProvider(): iterable
     {
-        return FunctionalTestStory::noAdminUsers();
+        yield "Author" => [UserRole::AUTHOR];
+        yield "Publisher" => [UserRole::PUBLISHER];
     }
 
     #[DataProvider('nonAdminUsersProvider')]
-    public function testPostListingData(User $user): void
+    public function testPostListingData(UserRole $userRole): void
     {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
 
@@ -55,14 +55,15 @@ class PostListingTest extends AbstractAppCrudTestCase
 
     public static function createUsersVisibilityProvider(): iterable
     {
-        yield "Author" => [UserFactory::anyAuthor(), true];
-        yield "Publisher" => [UserFactory::anyPublisher(), false];
-        yield "Admin" => [UserFactory::anyAdmin(), true];
+        yield "Author" => [UserRole::AUTHOR, true];
+        yield "Publisher" => [UserRole::PUBLISHER, false];
+        yield "Admin" => [UserRole::ADMIN, true];
     }
 
     #[DataProvider('createUsersVisibilityProvider')]
-    public function testCreateVisibility(User $user, bool $visible): void
+    public function testCreateVisibility(UserRole $userRole, bool $visible): void
     {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
         self::assertResponseIsSuccessful();
@@ -76,76 +77,84 @@ class PostListingTest extends AbstractAppCrudTestCase
 
     public static function detailActionUsersVisibilityProvider(): iterable
     {
-        yield "Author draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT];
-        yield "Publisher draft" => [UserFactory::anyPublisher(), PostStatus::DRAFT];
-        yield "Admin draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT];
-        yield "Author in_review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW];
-        yield "Publisher in_review" => [UserFactory::anyPublisher(), PostStatus::IN_REVIEW];
-        yield "Admin in_review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW];
-        yield "Author published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED];
-        yield "Publisher published" => [UserFactory::anyPublisher(), PostStatus::PUBLISHED];
-        yield "Admin published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED];
-        yield "Author archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED];
-        yield "Publisher archived" => [UserFactory::anyPublisher(), PostStatus::ARCHIVED];
-        yield "Admin archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED];
-        yield "Author rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED];
-        yield "Publisher rejected" => [UserFactory::anyPublisher(), PostStatus::REJECTED];
-        yield "Admin rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED];
+        yield "Author own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, true];
+        yield "Admin own draft" => [UserRole::ADMIN, PostStatus::DRAFT, true];
+        yield "Author own in_review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, true];
+        yield "Admin own in_review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, true];
+        yield "Author own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, true];
+        yield "Admin own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, true];
+        yield "Author own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, true];
+        yield "Admin own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, true];
+
+        yield "Author not own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, false];
+        yield "Publisher not own draft" => [UserRole::PUBLISHER, PostStatus::DRAFT, false];
+        yield "Admin not own draft" => [UserRole::ADMIN, PostStatus::DRAFT, false];
+        yield "Author not own in_review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, false];
+        yield "Publisher not own in_review" => [UserRole::PUBLISHER, PostStatus::IN_REVIEW, false];
+        yield "Admin not own in_review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, false];
+        yield "Author not own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, false];
+        yield "Publisher not own published" => [UserRole::PUBLISHER, PostStatus::PUBLISHED, false];
+        yield "Admin not own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, false];
+        yield "Author not own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, false];
+        yield "Publisher not own archived" => [UserRole::PUBLISHER, PostStatus::ARCHIVED, false];
+        yield "Admin not own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, false];
     }
 
     #[DataProvider('detailActionUsersVisibilityProvider')]
-    public function testDetailActionVisibility(User $user, PostStatus $status): void
+    public function testDetailActionVisibility(UserRole $userRole, PostStatus $status, bool $whichPost): void
     {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
         self::assertResponseIsSuccessful();
 
-        $ownPost = $this->getOwnPost($user, $status);
-        if ($ownPost) {
-            $this->assertIndexEntityActionExists(Action::DETAIL, $ownPost->getId());
-        }
+        $post = match($whichPost) {
+            true => $this->anyPostOwned($user, $status),
+            false => $this->anyPostNotOwned($user, $status),
+        };
 
-        $notOwnPost = $this->getNotOwnPost($user, $status);
-        $this->assertIndexEntityActionExists(Action::DETAIL, $notOwnPost->getId());
+        $this->assertIndexEntityActionExists(Action::DETAIL, $post->getId());
     }
 
 
     public static function editPostVisibilityProvider(): iterable
     {
-        yield "Author own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, 'own', true];
-        yield "Admin own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, 'own', true];
-        yield "Author own in-review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW, 'own', false];
-        yield "Admin own in review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW, 'own', false];
-        yield "Author own published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED, 'own', false];
-        yield "Admin own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, 'own', false];
-        yield "Author own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, 'own', false];
-        yield "Admin own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, 'own', false];
-        yield "Author not own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, "notOwn", false];
-        yield "Publisher not own draft" => [UserFactory::anyPublisher(), PostStatus::DRAFT, "notOwn", false];
-        yield "Admin not own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, "notOwn", true];
-        yield "Author not own in-review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Publisher not own in-review" => [UserFactory::anyPublisher(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Admin not own in-review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Author not own published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Publisher not own published" => [UserFactory::anyPublisher(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Admin not own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Author not own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Publisher not own archived" => [UserFactory::anyPublisher(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Admin not own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, "notOwn", false];
+        yield "Author own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, 'own', true];
+        yield "Admin own draft" => [UserRole::ADMIN, PostStatus::DRAFT, 'own', true];
+        yield "Author own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, 'own', false];
+        yield "Admin own in review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, 'own', false];
+        yield "Author own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, 'own', false];
+        yield "Admin own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, 'own', false];
+        yield "Author own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, 'own', false];
+        yield "Admin own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, 'own', false];
+
+        yield "Author not own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "notOwn", false];
+        yield "Publisher not own draft" => [UserRole::PUBLISHER, PostStatus::DRAFT, "notOwn", false];
+        yield "Admin not own draft" => [UserRole::ADMIN, PostStatus::DRAFT, "notOwn", true];
+        yield "Author not own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Publisher not own in-review" => [UserRole::PUBLISHER, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Admin not own in-review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Author not own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Publisher not own published" => [UserRole::PUBLISHER, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Admin not own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Author not own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Publisher not own archived" => [UserRole::PUBLISHER, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Admin not own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, "notOwn", false];
     }
 
     #[DataProvider('editPostVisibilityProvider')]
-    public function testEditPostActionVisibility(User $user, PostStatus $status, string $whichPost,  bool $visible): void
+    public function testEditPostActionVisibility(UserRole $userRole, PostStatus $status, string $whichPost,  bool $visible): void
     {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
         self::assertResponseIsSuccessful();
         
         $post = match($whichPost) {
-            "own" => $this->getOwnPost($user, $status),
-            'notOwn' => $this->getNotownPost($user, $status),
+            "own" => $this->anyPostOwned($user, $status),
+            'notOwn' => $this->anyPostNotOwned($user, $status),
         };
-        
+
         self::assertNotNull($post);
 
         if ($visible) {
@@ -157,43 +166,39 @@ class PostListingTest extends AbstractAppCrudTestCase
 
     public static function deletePostVisibilityProvider(): iterable
     {
-        yield "Author own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, "own", true];
-        yield "Admin own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, "own", true];
-        yield "Author own in-review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW, "own", false];
-        yield "Admin own in review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW, "own", false];
-        yield "Author own published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED, "own", false];
-        yield "Admin own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, "own", false];
-        yield "Author own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, "own", false];
-        yield "Admin own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, "own", false];
-        yield "Author own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, "own", false];
-        yield "Admin own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, "own", false];
-        yield "Author not own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, "notOwn", false];
-        yield "Publisher not own draft" => [UserFactory::anyPublisher(), PostStatus::DRAFT, "notOwn", false];
-        yield "Admin not own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, "notOwn", true];
-        yield "Author not own in-review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Publisher not own in-review" => [UserFactory::anyPublisher(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Admin not own in-review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Author not own published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Publisher not own published" => [UserFactory::anyPublisher(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Admin not own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Author not own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Publisher not own archived" => [UserFactory::anyPublisher(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Admin not own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Author not own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, "notOwn", false];
-        yield "Publisher not own rejected" => [UserFactory::anyPublisher(), PostStatus::REJECTED, "notOwn", false];
-        yield "Admin not own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, "notOwn", false];
+        yield "Author own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "own", true];
+        yield "Admin own draft" => [UserRole::ADMIN, PostStatus::DRAFT, "own", true];
+        yield "Author own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, "own", false];
+        yield "Admin own in review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, "own", false];
+        yield "Author own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, "own", false];
+        yield "Admin own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, "own", false];
+        yield "Author own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, "own", false];
+        yield "Admin own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, "own", false];
+        yield "Author not own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "notOwn", false];
+        yield "Publisher not own draft" => [UserRole::PUBLISHER, PostStatus::DRAFT, "notOwn", false];
+        yield "Admin not own draft" => [UserRole::ADMIN, PostStatus::DRAFT, "notOwn", true];
+        yield "Author not own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Publisher not own in-review" => [UserRole::PUBLISHER, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Admin not own in-review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Author not own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Publisher not own published" => [UserRole::PUBLISHER, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Admin not own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Author not own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Publisher not own archived" => [UserRole::PUBLISHER, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Admin not own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, "notOwn", false];
     }
 
     #[DataProvider('deletePostVisibilityProvider')]
-    public function testDeletePostActionVisibility(User $user, PostStatus $status, string $whichPost, bool $visible): void
+    public function testDeletePostActionVisibility(UserRole $userRole, PostStatus $status, string $whichPost, bool $visible): void
     {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
         self::assertResponseIsSuccessful();
 
         $post = match($whichPost) {
-            "own" => $this->getOwnPost($user, $status),
-            'notOwn' => $this->getNotownPost($user, $status),
+            "own" => $this->anyPostOwned($user, $status),
+            'notOwn' => $this->anyPostNotOwned($user, $status),
         };
 
         self::assertNotNull($post);
@@ -207,44 +212,40 @@ class PostListingTest extends AbstractAppCrudTestCase
 
     public static function requestReviewPostVisibilityProvider(): iterable
     {
-        yield "Author own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, "own", true];
-        yield "Admin own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, "own", true];
-        yield "Author own in-review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW, "own", false];
-        yield "Admin own in review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW, "own", false];
-        yield "Author own published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED, "own", false];
-        yield "Admin own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, "own", false];
-        yield "Author own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, "own", false];
-        yield "Admin own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, "own", false];
-        yield "Author own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, "own", false];
-        yield "Admin own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, "own", false];
+        yield "Author own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "own", true];
+        yield "Admin own draft" => [UserRole::ADMIN, PostStatus::DRAFT, "own", true];
+        yield "Author own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, "own", false];
+        yield "Admin own in review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, "own", false];
+        yield "Author own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, "own", false];
+        yield "Admin own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, "own", false];
+        yield "Author own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, "own", false];
+        yield "Admin own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, "own", false];
 
-        yield "Author not own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, "notOwn", false];
-        yield "Publisher not own draft" => [UserFactory::anyPublisher(), PostStatus::DRAFT, "notOwn", false];
-        yield "Admin not own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, "notOwn", true];
-        yield "Author not own in-review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Publisher not own in-review" => [UserFactory::anyPublisher(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Admin not own in-review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Author not own published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Publisher not own published" => [UserFactory::anyPublisher(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Admin not own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Author not own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Publisher not own archived" => [UserFactory::anyPublisher(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Admin not own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Author not own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, "notOwn", false];
-        yield "Publisher not own rejected" => [UserFactory::anyPublisher(), PostStatus::REJECTED, "notOwn", false];
-        yield "Admin not own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, "notOwn", false];
+        yield "Author not own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "notOwn", false];
+        yield "Publisher not own draft" => [UserRole::PUBLISHER, PostStatus::DRAFT, "notOwn", false];
+        yield "Admin not own draft" => [UserRole::ADMIN, PostStatus::DRAFT, "notOwn", true];
+        yield "Author not own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Publisher not own in-review" => [UserRole::PUBLISHER, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Admin not own in-review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Author not own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Publisher not own published" => [UserRole::PUBLISHER, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Admin not own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Author not own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Publisher not own archived" => [UserRole::PUBLISHER, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Admin not own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, "notOwn", false];
     }
 
     #[DataProvider('requestReviewPostVisibilityProvider')]
-    public function testRequestReviewPostActionVisibility(User $user, PostStatus $status, string $whichPost, bool $visible): void
+    public function testRequestReviewPostActionVisibility(UserRole $userRole, PostStatus $status, string $whichPost, bool $visible): void
     {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
         self::assertResponseIsSuccessful();
 
         $post = match($whichPost) {
-            "own" => $this->getOwnPost($user, $status),
-            'notOwn' => $this->getNotownPost($user, $status),
+            "own" => $this->anyPostOwned($user, $status),
+            'notOwn' => $this->anyPostNotOwned($user, $status),
         };
         self::assertNotNull($post);
 
@@ -257,44 +258,40 @@ class PostListingTest extends AbstractAppCrudTestCase
 
     public static function publishPostVisibilityProvider(): iterable
     {
-        yield "Author own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, "own", false];
-        yield "Admin own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, "own", false];
-        yield "Author own in-review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW, "own", false];
-        yield "Admin own in review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW, "own", true];
-        yield "Author own published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED, "own", false];
-        yield "Admin own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, "own", false];
-        yield "Author own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, "own", false];
-        yield "Admin own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, "own", false];
-        yield "Author own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, "own", false];
-        yield "Admin own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, "own", false];
+        yield "Author own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "own", false];
+        yield "Admin own draft" => [UserRole::ADMIN, PostStatus::DRAFT, "own", false];
+        yield "Author own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, "own", false];
+        yield "Admin own in review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, "own", true];
+        yield "Author own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, "own", false];
+        yield "Admin own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, "own", false];
+        yield "Author own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, "own", false];
+        yield "Admin own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, "own", false];
 
-        yield "Author not own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, "notOwn", false];
-        yield "Publisher not own draft" => [UserFactory::anyAuthor(), PostStatus::DRAFT, "notOwn", false];
-        yield "Admin not own draft" => [UserFactory::anyAdmin(), PostStatus::DRAFT, "notOwn", false];
-        yield "Author not own in-review" => [UserFactory::anyAuthor(), PostStatus::IN_REVIEW, "notOwn", false];
-        yield "Publisher not own in-review" => [UserFactory::anyPublisher(), PostStatus::IN_REVIEW, "notOwn", true];
-        yield "Admin not own in-review" => [UserFactory::anyAdmin(), PostStatus::IN_REVIEW, "notOwn", true];
-        yield "Author not own published" => [UserFactory::anyAuthor(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Publisher not own published" => [UserFactory::anyPublisher(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Admin not own published" => [UserFactory::anyAdmin(), PostStatus::PUBLISHED, "notOwn", false];
-        yield "Author not own archived" => [UserFactory::anyAuthor(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Publisher not own archived" => [UserFactory::anyPublisher(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Admin not own archived" => [UserFactory::anyAdmin(), PostStatus::ARCHIVED, "notOwn", false];
-        yield "Author not own rejected" => [UserFactory::anyAuthor(), PostStatus::REJECTED, "notOwn", false];
-        yield "Publisher not own rejected" => [UserFactory::anyPublisher(), PostStatus::REJECTED, "notOwn", false];
-        yield "Admin not own rejected" => [UserFactory::anyAdmin(), PostStatus::REJECTED, "notOwn", false];
+        yield "Author not own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "notOwn", false];
+        yield "Publisher not own draft" => [UserRole::AUTHOR, PostStatus::DRAFT, "notOwn", false];
+        yield "Admin not own draft" => [UserRole::ADMIN, PostStatus::DRAFT, "notOwn", false];
+        yield "Author not own in-review" => [UserRole::AUTHOR, PostStatus::IN_REVIEW, "notOwn", false];
+        yield "Publisher not own in-review" => [UserRole::PUBLISHER, PostStatus::IN_REVIEW, "notOwn", true];
+        yield "Admin not own in-review" => [UserRole::ADMIN, PostStatus::IN_REVIEW, "notOwn", true];
+        yield "Author not own published" => [UserRole::AUTHOR, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Publisher not own published" => [UserRole::PUBLISHER, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Admin not own published" => [UserRole::ADMIN, PostStatus::PUBLISHED, "notOwn", false];
+        yield "Author not own archived" => [UserRole::AUTHOR, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Publisher not own archived" => [UserRole::PUBLISHER, PostStatus::ARCHIVED, "notOwn", false];
+        yield "Admin not own archived" => [UserRole::ADMIN, PostStatus::ARCHIVED, "notOwn", false];
     }
 
     #[DataProvider('publishPostVisibilityProvider')]
-    public function testPublishPostActionVisibility(User $user, PostStatus $status, string $whichPost, bool $visible): void
+    public function testPublishPostActionVisibility(UserRole $userRole, PostStatus $status, string $whichPost, bool $visible): void
     {
+        $user = $this->anyUser($userRole);
         $this->login($user->getEmail());
         $this->client->request("GET", $this->generateIndexUrl());
         self::assertResponseIsSuccessful();
 
         $post = match($whichPost) {
-            "own" => $this->getOwnPost($user, $status),
-            'notOwn' => $this->getNotownPost($user, $status),
+            "own" => $this->anyPostOwned($user, $status),
+            'notOwn' => $this->anyPostNotOwned($user, $status),
         };
         self::assertNotNull($post);
 
@@ -308,31 +305,5 @@ class PostListingTest extends AbstractAppCrudTestCase
     protected function getControllerFqcn(): string
     {
         return PostCrudController::class;
-    }
-
-    private function getOwnPost(User $user, PostStatus $status): ?Post
-    {
-        $postRepository = $this->entityManager->getRepository(Post::class);
-
-        $ownPosts = array_values(array_filter($postRepository->findBy(['status' => $status]), fn(Post $post) => $post->getAuthor()->getId() === $user->getId()));
-
-        if (count($ownPosts) === 0) {
-            return null;
-        }
-
-        return $ownPosts[0];
-    }
-
-    private function getNotOwnPost(User $user, PostStatus $status): ?Post
-    {
-        $postRepository = $this->entityManager->getRepository(Post::class);
-
-        $notOwnPosts = array_values(array_filter($postRepository->findBy(['status' => $status]), fn(Post $post) => $post->getAuthor()->getId() !== $user->getId()));
-
-        if (count($notOwnPosts) === 0) {
-            return null;
-        }
-
-        return $notOwnPosts[0];
     }
 }

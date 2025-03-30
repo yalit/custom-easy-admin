@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Functional\EasyAdmin\Trait;
+namespace App\Tests\Trait;
 
 trait AdditionalCrudAsserts
 {

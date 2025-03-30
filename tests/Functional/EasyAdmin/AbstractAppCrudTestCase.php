@@ -4,6 +4,8 @@ namespace App\Tests\Functional\EasyAdmin;
 
 use App\Controller\Admin\DashboardController;
 use App\Story\Factory\UserFactory;
+use App\Tests\Trait\AdditionalCrudAsserts;
+use App\Tests\Trait\GetTestData;
 use EasyCorp\Bundle\EasyAdminBundle\Test\AbstractCrudTestCase;
 use EasyCorp\Bundle\EasyAdminBundle\Test\Trait\CrudTestSelectors;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,7 +14,7 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 
 abstract class AbstractAppCrudTestCase extends AbstractCrudTestCase
 {
-    use ResetDatabase, Factories, CrudTestSelectors;
+    use GetTestData, AdditionalCrudAsserts;
 
     abstract protected function getControllerFqcn(): string;
 

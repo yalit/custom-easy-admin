@@ -29,9 +29,6 @@ jobs:
         env:
           update: true
 
-      - name: Check PHP Version
-        run: php -v
-
       # —— Composer 🧙‍️ —————————————————————————————————————————————————————————
       - name: Validate composer.json and composer.lock
         run: composer validate
@@ -50,14 +47,10 @@ jobs:
       - name: Install Composer dependencies
         run: make install
 
-      ## —— Firefox 🧙‍️ —————————————————————————————————————————————————————————
-      - name: Install Firefox
-        uses: browser-actions/setup-firefox@latest
-
       ## —— Tests ✅ ———————————————————————————————————————————————————————————
       - name: Prepare test environment
         run: |
-          make tests-prepare
+          make db-fixtures-test
 
       - name: Run functionnal and unit tests
         run: |

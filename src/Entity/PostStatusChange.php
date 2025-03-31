@@ -28,7 +28,7 @@ class PostStatusChange
     #[JoinColumn(nullable: true)]
     private ?Post $post = null;
 
-    #[ManyToOne(targetEntity: User::class, inversedBy: 'statusChanges')]
+    #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(nullable: true)]
     private ?User $user = null;
 

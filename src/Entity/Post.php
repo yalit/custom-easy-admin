@@ -1,154 +1,80 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace App\Entity;
 
-use App\Workflow\PostWorkflow;
+use App\Entity\Enums\PostStatus;
+use App\Repository\PostRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\PostRepository")
- * @ORM\Table(name="symfony_demo_post")
- * @UniqueEntity(fields={"slug"}, errorPath="title", message="post.slug_unique")
- *
- * Defines the properties of the Post entity to represent the blog posts.
- *
- * See https://symfony.com/doc/current/doctrine.html#creating-an-entity-class
- *
- * Tip: if you have an existing database, you can generate these entity class automatically.
- * See https://symfony.com/doc/current/doctrine/reverse_engineering.html
- *
- * @author Ryan Weaver <weaverryan@gmail.com>
- * @author Javier Eguiluz <javier.eguiluz@gmail.com>
- * @author Yonel Ceruto <yonelceruto@gmail.com>
- */
+#[ORM\Entity(repositoryClass: PostRepository::class)]
 class Post
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
     private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string")
-     */
-    #[Assert\NotBlank]
+    #[ORM\Column(length: 255)]
     private ?string $title = null;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(length: 255)]
     private ?string $slug = null;
 
-    /**
-     * @ORM\Column(type="string")
-     */
-    #[
-        Assert\NotBlank(message: 'post.blank_summary'),
-        Assert\Length(max: 255)
-    ]
+    #[ORM\Column(length: 255)]
     private ?string $summary = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="text")
-     */
-    #[
-        Assert\NotBlank(message: 'post.blank_content'),
-        Assert\Length(min: 10, minMessage: 'post.too_short_content')
-    ]
+    #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
     /**
-     * @ORM\Column(type="datetime_immutable")
+     * @var Collection<int, PostStatusChange>
      */
-    private \DateTimeImmutable $createdAt;
+    #[ORM\OneToMany(targetEntity: PostStatusChange::class, mappedBy: 'post', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $statusChanges;
 
-    /**
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    private ?\DateTimeImmutable $inReviewAt = null;
-
-    /**
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    private ?\DateTimeImmutable $publishedAt = null;
-
-    /**
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    private ?\DateTimeImmutable $cancelledAt = null;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(inversedBy: 'posts')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
 
     /**
-     * @var Comment[]|Collection
-     *
-     * @ORM\OneToMany(
-     *      targetEntity="Comment",
-     *      mappedBy="post",
-     *      orphanRemoval=true,
-     *      cascade={"persist"}
-     * )
-     * @ORM\OrderBy({"createdAt": "DESC"})
+     * @var Collection<int, Comment>
      */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'post', orphanRemoval: true)]
     private Collection $comments;
 
     /**
-     * @var Tag[]|Collection
-     *
-     * @ORM\ManyToMany(targetEntity="App\Entity\Tag", cascade={"persist"})
-     * @ORM\JoinTable(name="symfony_demo_post_tag")
-     * @ORM\OrderBy({"name": "ASC"})
+     * @var Collection<int, Tag>
      */
-    #[Assert\Count(max: 4, maxMessage: 'post.too_many_tags')]
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'posts')]
     private Collection $tags;
 
-    /**
-     * @ORM\Column(type="string", nullable=false)
-     */
-    private string $status = PostWorkflow::STATUS_DRAFT;
+    #[ORM\Column(type: Types::STRING, enumType: PostStatus::class)]
+    private PostStatus $status = PostStatus::DRAFT;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
         $this->comments = new ArrayCollection();
         $this->tags = new ArrayCollection();
+        $this->statusChanges = new ArrayCollection();
     }
 
-    public function getStatusDate(): \DateTimeImmutable
+    public function getStatusDate(): DateTimeImmutable
     {
-        // not very sexy but app not foreseen to grow ;-) let's refactor if we need it afterwards
-        switch ($this->status){
-            case PostWorkflow::STATUS_DRAFT:
-                return $this->createdAt;
-            case PostWorkflow::STATUS_IN_REVIEW:
-                return $this->inReviewAt;
-            case PostWorkflow::STATUS_PUBLISHED:
-                return $this->publishedAt;
-            case PostWorkflow::STATUS_CANCELLED:
-                return $this->cancelledAt;
-        }
+        return $this->statusChanges->first()->getTime();
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->statusChanges->last()->getTime();
+    }
+
+    public function getLatestStatusChange(): PostStatusChange
+    {
+        return $this->statusChanges->first();
     }
 
     public function getId(): ?int
@@ -161,9 +87,11 @@ class Post
         return $this->title;
     }
 
-    public function setTitle(?string $title): void
+    public function setTitle(string $title): static
     {
         $this->title = $title;
+
+        return $this;
     }
 
     public function getSlug(): ?string
@@ -171,47 +99,11 @@ class Post
         return $this->slug;
     }
 
-    public function setSlug(string $slug): void
+    public function setSlug(string $slug): static
     {
         $this->slug = $slug;
-    }
 
-    public function getContent(): ?string
-    {
-        return $this->content;
-    }
-
-    public function setContent(?string $content): void
-    {
-        $this->content = $content;
-    }
-
-    public function getAuthor(): ?User
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(?User $author): void
-    {
-        $this->author = $author;
-    }
-
-    public function getComments(): Collection
-    {
-        return $this->comments;
-    }
-
-    public function addComment(Comment $comment): void
-    {
-        $comment->setPost($this);
-        if (!$this->comments->contains($comment)) {
-            $this->comments->add($comment);
-        }
-    }
-
-    public function removeComment(Comment $comment): void
-    {
-        $this->comments->removeElement($comment);
+        return $this;
     }
 
     public function getSummary(): ?string
@@ -219,58 +111,23 @@ class Post
         return $this->summary;
     }
 
-    public function setSummary(?string $summary): void
+    public function setSummary(string $summary): static
     {
         $this->summary = $summary;
+
+        return $this;
     }
 
-    public function addTag(Tag ...$tags): void
+    public function getContent(): ?string
     {
-        foreach ($tags as $tag) {
-            if (!$this->tags->contains($tag)) {
-                $this->tags->add($tag);
-            }
-        }
+        return $this->content;
     }
 
-    public function removeTag(Tag $tag): void
+    public function setContent(string $content): static
     {
-        $this->tags->removeElement($tag);
-    }
+        $this->content = $content;
 
-    public function getTags(): Collection
-    {
-        return $this->tags;
-    }
-
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(string $status): void
-    {
-        $this->status = $status;
-    }
-
-    public function getCreatedAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): void
-    {
-        $this->createdAt = $createdAt;
-    }
-
-    public function getInReviewAt(): ?\DateTimeImmutable
-    {
-        return $this->inReviewAt;
-    }
-
-    public function setInReviewAt(?\DateTimeImmutable $inReviewAt): void
-    {
-        $this->inReviewAt = $inReviewAt;
+        return $this;
     }
 
     public function getPublishedAt(): ?\DateTimeImmutable
@@ -278,18 +135,120 @@ class Post
         return $this->publishedAt;
     }
 
-    public function setPublishedAt(?\DateTimeImmutable $publishedAt): void
+    public function setPublishedAt(\DateTimeImmutable $publishedAt): static
     {
         $this->publishedAt = $publishedAt;
+
+        return $this;
     }
 
-    public function getCancelledAt(): ?\DateTimeImmutable
+    public function getAuthor(): ?User
     {
-        return $this->cancelledAt;
+        return $this->author;
     }
 
-    public function setCancelledAt(?\DateTimeImmutable $cancelledAt): void
+    public function setAuthor(?User $author): static
     {
-        $this->cancelledAt = $cancelledAt;
+        $this->author = $author;
+
+        return $this;
     }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getPost() === $this) {
+                $comment->setPost(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): static
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags->add($tag);
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): static
+    {
+        $this->tags->removeElement($tag);
+
+        return $this;
+    }
+
+    public function getStatus(): PostStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(PostStatus $status): void
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return Collection<int, PostStatusChange>
+     */
+    public function getStatusChanges(): Collection
+    {
+        $statusChangesArray = $this->statusChanges->toArray();
+        uasort($statusChangesArray, fn (PostStatusChange $a, PostStatusChange $b) => $b->getTime()->getTimestamp() - $a->getTime()->getTimestamp());
+
+        return new ArrayCollection($statusChangesArray);
+    }
+
+    public function addStatusChange(PostStatusChange $statusChange): static
+    {
+        if (!$this->statusChanges->contains($statusChange)) {
+            $this->statusChanges->add($statusChange);
+            $statusChange->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStatusChange(PostStatusChange $statusChange): static
+    {
+        if ($this->statusChanges->removeElement($statusChange)) {
+            // set the owning side to null (unless already changed)
+            if ($statusChange->getPost() === $this) {
+                $statusChange->setPost(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

@@ -1,18 +1,13 @@
+.PHONY:tests
+
 about:
 	bin/console about
 
 install:
 	composer install
-	yarn install
 
 build:
-	yarn encore prod
-
-build-dev:
-	yarn encore dev
-
-build-dev-watch:
-	yarn encore dev --watch
+	bin/console asset-map:compile
 
 db-init-dev:
 	bin/console d:s:d --env=dev --force
@@ -20,19 +15,20 @@ db-init-dev:
 	bin/console d:s:c --env=dev
 	bin/console d:s:u --force --env=dev
 
-db-fixtures:
-	bin/console d:f:l -n --env=dev
-
-tests-prepare:
+db-init-test:
 	bin/console d:s:d --env=test --force
 	bin/console d:d:c --env=test
 	bin/console d:s:c --env=test
 	bin/console d:s:u --force --env=test
-	bin/console d:f:l -n --env=test
-	vendor/bin/bdi detect drivers
 
-test:
-	bin/phpunit
+db-fixtures: db-init-dev
+	bin/console  doctrine:fixtures:load -n
+
+db-fixtures-test: db-init-test
+	bin/console  doctrine:fixtures:load --env=test -n
+
+tests:
+	./vendor/bin/phpunit --testdox
 
 lint-yaml:
 	./bin/console lint:yaml config --parse-tags

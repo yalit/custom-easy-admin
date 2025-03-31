@@ -84,11 +84,5 @@ class PostCrudController extends AbstractCrudController
             ->setFormat(self::STATUS_DATE_FORMAT)
             ->hideOnForm();
         yield AssociationField::new('tags');
-        /*yield CollectionField::new('comments')
-            // defines a specific custom block name (for the overwrite)
-            ->setFormTypeOption('block_name', 'custom_collection_comments')
-            // defines the type of Form of each entry of the Collection
-            ->setEntryType(CommentType::class)
-        ;*/
     }
 }

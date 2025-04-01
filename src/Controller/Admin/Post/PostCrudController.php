@@ -67,7 +67,6 @@ class PostCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, PostArchiveAction::create())
             ->add(Crud::PAGE_DETAIL, PostArchiveAction::create())
             ->setPermission(PostArchiveAction::NAME, PostVoter::ARCHIVE)
-
             ;
     }
 

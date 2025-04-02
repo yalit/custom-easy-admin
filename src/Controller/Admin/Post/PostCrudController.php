@@ -96,7 +96,8 @@ class PostCrudController extends AbstractCrudController
     public function configureFilters(Filters $filters): Filters
     {
         return parent::configureFilters($filters)
-            ->add('title')
+            ->add('author')
+            ->add('status')
             ->add(OwnPostFilter::new($this->security))
             ;
     }

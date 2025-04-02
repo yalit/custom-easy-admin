@@ -23,7 +23,7 @@ class OwnPostFilter implements FilterInterface
         return new self()
             ->setFilterFqcn(__CLASS__)
             ->setLabel($label ?? 'Own posts')
-            ->setProperty('author')
+            ->setProperty('own_posts')
             ->setFormTypeOption('mapped', false)
             ->setFormType(CheckboxType::class)
             ->setSecurity($security);

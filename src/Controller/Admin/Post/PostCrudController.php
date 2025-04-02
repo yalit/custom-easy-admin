@@ -3,16 +3,19 @@
 namespace App\Controller\Admin\Post;
 
 use App\Admin\Action\Post\PostArchiveAction;
+use App\Admin\Action\Post\PostFilterOwnPostAction;
 use App\Admin\Action\Post\PostRejectReviewAction;
 use App\Admin\Action\Post\PostRequestReviewAction;
 use App\Admin\Action\Post\PublishPostAction;
 use App\Admin\Field\EnumField;
+use App\Admin\Filter\OwnPostFilter;
 use App\Entity\Enums\PostStatus;
 use App\Entity\Post;
 use App\Voter\PostVoter;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CodeEditorField;
@@ -20,10 +23,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class PostCrudController extends AbstractCrudController
 {
-    public const string STATUS_DATE_FORMAT = 'MMM dd, y HH:mm a';
+    public const STATUS_DATE_FORMAT = 'MMM dd, y HH:mm a';
+
+    public function __construct(private readonly Security $security)
+    {}
 
     public static function getEntityFqcn(): string
     {
@@ -84,5 +91,14 @@ class PostCrudController extends AbstractCrudController
             ->setFormat(self::STATUS_DATE_FORMAT)
             ->hideOnForm();
         yield AssociationField::new('tags');
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return parent::configureFilters($filters)
+            ->add('author')
+            ->add('status')
+            ->add(OwnPostFilter::new($this->security))
+            ;
     }
 }

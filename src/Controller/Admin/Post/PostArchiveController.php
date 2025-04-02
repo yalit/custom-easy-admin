@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin/post/{id}/archive', name: PostArchiveController::CRUD_ROUTE_NAME, methods: ['GET'])]
 class PostArchiveController extends AbstractCrudController
 {
-    public const string CRUD_ROUTE_NAME = 'admin_post_archive';
+    public const CRUD_ROUTE_NAME = 'admin_post_archive';
 
     public function __construct(private readonly MessageBusInterface $messageBus)
     {}

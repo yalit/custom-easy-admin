@@ -9,8 +9,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 class PostRejectReviewAction extends AbstractCrudController
 {
-    public const string NAME = 'post_reject_review';
-    public const string LABEL = 'Reject';
+    public const NAME = 'post_reject_review';
+    public const LABEL = 'Reject';
 
     public static function create(): Action
     {

@@ -12,14 +12,14 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class PostVoter extends Voter
 {
-    public const string VIEW = 'post_show';
-    public const string CREATE = 'post_create';
-    public const string EDIT =  'post_edit';
-    public const string DELETE = 'post_delete';
-    public const string REQUEST_REVIEW = 'post_request_review';
-    public const string PUBLISH = 'post_publish';
-    public const string REJECT_REVIEW = 'post_reject_review';
-    public const string ARCHIVE = 'post_archive';
+    public const VIEW = 'post_show';
+    public const CREATE = 'post_create';
+    public const EDIT =  'post_edit';
+    public const DELETE = 'post_delete';
+    public const REQUEST_REVIEW = 'post_request_review';
+    public const PUBLISH = 'post_publish';
+    public const REJECT_REVIEW = 'post_reject_review';
+    public const ARCHIVE = 'post_archive';
 
     public function __construct(private readonly Security $security)
     {

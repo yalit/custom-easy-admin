@@ -10,8 +10,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 class PostArchiveAction extends AbstractCrudController
 {
-    public const string NAME = 'post_archive';
-    public const string LABEL = 'Archive';
+    public const NAME = 'post_archive';
+    public const LABEL = 'Archive';
 
     public static function create(): Action
     {

@@ -9,8 +9,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 class PostRequestReviewAction extends AbstractCrudController
 {
-    public const string NAME = 'request_review';
-    public const string LABEL = 'Request Review';
+    public const NAME = 'request_review';
+    public const LABEL = 'Request Review';
 
     public static function create(): Action
     {

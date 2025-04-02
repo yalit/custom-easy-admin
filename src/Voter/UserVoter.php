@@ -10,8 +10,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class UserVoter extends Voter
 {
-    public const string EDIT = 'user_edit';
-    public const string CREATE = 'user_create';
+    public const EDIT = 'user_edit';
+    public const CREATE = 'user_create';
 
     public function __construct(private readonly Security $security)
     {

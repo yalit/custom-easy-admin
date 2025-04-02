@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin/post/{id}/requestReview', name: PostRequestReviewController::CRUD_ROUTE_NAME, methods: ['GET'])]
 class PostRequestReviewController extends AbstractCrudController
 {
-    public const string CRUD_ROUTE_NAME = 'admin_post_request_review';
+    public const CRUD_ROUTE_NAME = 'admin_post_request_review';
 
     public function __construct(private readonly MessageBusInterface $messageBus)
     {}

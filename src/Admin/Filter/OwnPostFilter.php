@@ -20,7 +20,7 @@ class OwnPostFilter implements FilterInterface
 
     public static function new(Security $security, ?string $label = null): self
     {
-        return new self()
+        return (new self())
             ->setFilterFqcn(__CLASS__)
             ->setLabel($label ?? 'Own posts')
             ->setProperty('own_posts')

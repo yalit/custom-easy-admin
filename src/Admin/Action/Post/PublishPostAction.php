@@ -9,8 +9,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 class PublishPostAction extends AbstractCrudController
 {
-    public const string NAME = 'post_publish';
-    public const string LABEL = 'Publish';
+    public const NAME = 'post_publish';
+    public const LABEL = 'Publish';
 
     public static function create(): Action
     {

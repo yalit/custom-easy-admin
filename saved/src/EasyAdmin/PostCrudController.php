@@ -28,7 +28,7 @@ use Workflow\WorkflowActioner;
 
 final class PostCrudController extends AbstractCrudController
 {
-    public const string STATUS_DATE_FORMAT = 'MMM dd, y HH:mm a';
+    public const STATUS_DATE_FORMAT = 'MMM dd, y HH:mm a';
 
     public function __construct(private readonly WorkflowActioner $workflowActioner)
     {

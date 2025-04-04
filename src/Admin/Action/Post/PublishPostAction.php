@@ -15,12 +15,14 @@ class PublishPostAction extends AbstractCrudController
     public static function create(): Action
     {
         return Action::new(self::NAME, self::LABEL)
-            ->linkToRoute(PostPublishController::CRUD_ROUTE_NAME, fn(Post $post) => ['id' => $post->getId()]);;
+            ->linkToRoute(PostPublishController::CRUD_ROUTE_NAME, fn(Post $post) => ['id' => $post->getId()])
+            ->displayAsForm()
+            ->setCssClass('inline-button')
+            ;
     }
 
     public static function getEntityFqcn(): string
     {
         return Post::class;
     }
-
 }

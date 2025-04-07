@@ -15,7 +15,9 @@ class PostRejectReviewAction extends AbstractCrudController
     public static function create(): Action
     {
         return Action::new(self::NAME, self::LABEL)
-            ->linkToRoute(PostRejectReviewController::CRUD_ROUTE_NAME, fn(Post $post) => ['id' => $post->getId()]);;
+            ->linkToRoute(PostRejectReviewController::CRUD_ROUTE_NAME, fn(Post $post) => ['id' => $post->getId()])
+            ->displayAsForm()
+            ;
     }
 
     public static function getEntityFqcn(): string

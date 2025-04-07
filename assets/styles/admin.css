@@ -4,3 +4,23 @@ p.description { max-width: 60ch; text-wrap: balance; }
 #dashboard .content-top { display: none; }
 #regenerate-fixtures .content-top { display: none; }
 
+.actions {
+    form {
+        display: inline-block;
+        button {
+            all: unset;
+            cursor: pointer;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+
+            span.action-label {
+                color: var(--link-color);
+
+                &:hover {
+                    color: var(--link-hover-color);
+                    text-decoration: var(--link-hover-decoration);
+                }
+            }
+        }
+    }
+}

@@ -7,7 +7,7 @@ p.description { max-width: 60ch; text-wrap: balance; }
 .actions {
     form {
         display: inline-block;
-        .inline-button {
+        button {
             all: unset;
             cursor: pointer;
             font-size: var(--font-size-sm);

@@ -17,7 +17,6 @@ class PublishPostAction extends AbstractCrudController
         return Action::new(self::NAME, self::LABEL)
             ->linkToRoute(PostPublishController::CRUD_ROUTE_NAME, fn(Post $post) => ['id' => $post->getId()])
             ->displayAsForm()
-            ->setCssClass('inline-button')
             ;
     }
 

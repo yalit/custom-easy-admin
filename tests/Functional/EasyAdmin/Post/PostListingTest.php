@@ -9,7 +9,6 @@ use App\Admin\Action\Post\PostRequestReviewAction;
 use App\Controller\Admin\Post\PostCrudController;
 use App\Entity\Enums\PostStatus;
 use App\Entity\Enums\UserRole;
-use App\Entity\User;
 use App\Tests\Functional\EasyAdmin\AbstractAppCrudTestCase;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Test\Trait\CrudTestIndexAsserts;

@@ -3,7 +3,7 @@
 namespace App\Controller\Admin\Post;
 
 use App\Entity\Post;
-use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+use App\Process\Post\ArchivePost;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -17,9 +17,11 @@ class PostArchiveController extends AbstractCrudController
     public function __construct(private readonly MessageBusInterface $messageBus)
     {}
 
-    public function __invoke(AdminContext $context, Post $post): Response
+    public function __invoke(Post $post): Response
     {
-        // TODO : implement tests and process triggering for Archive
+        $this->messageBus->dispatch(new ArchivePost($post));
+
+        return $this->redirectToRoute('admin_post_index');
     }
 
     public static function getEntityFqcn(): string

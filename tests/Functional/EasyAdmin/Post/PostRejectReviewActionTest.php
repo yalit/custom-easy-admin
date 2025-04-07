@@ -25,7 +25,7 @@ class PostRejectReviewActionTest extends AbstractAppCrudTestCase
         self::assertNotNull($post);
 
         $url = $urlGenerator->setRoute(PostRejectReviewController::CRUD_ROUTE_NAME, ['id' => $post->getId()])->generateUrl();
-        $this->client->request(Request::METHOD_GET, $url);
+        $this->client->request(Request::METHOD_POST, $url);
         self::assertResponseRedirects();
         $this->client->followRedirect();
         self::assertResponseIsSuccessful();

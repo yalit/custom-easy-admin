@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/admin/post/{id}/archive', name: PostArchiveController::CRUD_ROUTE_NAME, methods: ['GET'])]
+#[Route('/admin/post/{id}/archive', name: PostArchiveController::CRUD_ROUTE_NAME, methods: ['POST'])]
 class PostArchiveController extends AbstractCrudController
 {
     public const CRUD_ROUTE_NAME = 'admin_post_archive';
@@ -19,6 +19,7 @@ class PostArchiveController extends AbstractCrudController
 
     public function __invoke(AdminContext $context, Post $post): Response
     {
+        // TODO : implement tests and process triggering for Archive
     }
 
     public static function getEntityFqcn(): string
